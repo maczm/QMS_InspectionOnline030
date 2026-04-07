@@ -9,19 +9,25 @@
             <div class="order-input">
               <el-input v-model="currentOrder" size="small" class="order-field">
                 <el-button
-                    slot="append" style="margin-right: 5px" icon="el-icon-search"
-                    @click="handleOrderSearch"
+                  slot="append"
+                  style="margin-right: 5px"
+                  icon="el-icon-search"
+                  @click="handleOrderSearch"
                 ></el-button>
                 <el-button
-                    slot="append" icon="el-icon-full-screen" @click="onCamera('wipOrderNo')"
-                    v-if="isApp"
+                  slot="append"
+                  icon="el-icon-full-screen"
+                  @click="onCamera('wipOrderNo')"
+                  v-if="isApp"
                 >
                 </el-button>
               </el-input>
             </div>
 
             <div class="toggle-icon" @click="toggleCollapse">
-              <i :class="isCollapsed ? 'el-icon-arrow-down' : 'el-icon-arrow-up'"></i>
+              <i
+                :class="isCollapsed ? 'el-icon-arrow-down' : 'el-icon-arrow-up'"
+              ></i>
             </div>
           </div>
         </div>
@@ -43,26 +49,48 @@
               <div class="input-section">
                 <div class="input-row">
                   <div class="input-label">月顺序号</div>
-                  <el-input v-model="monthlySequence" size="small" class="input-field">
+                  <el-input
+                    v-model="monthlySequence"
+                    size="small"
+                    class="input-field"
+                  >
                     <el-button
-                        slot="append" style="margin-right: 5px" icon="el-icon-search"
-                        @click="handleMonthlySequenceSearch"
+                      slot="append"
+                      style="margin-right: 5px"
+                      icon="el-icon-search"
+                      @click="handleMonthlySequenceSearch"
                     >
                     </el-button>
-                    <el-button slot="append" icon="el-icon-full-screen" @click="onCamera('monthSequence')" v-if="isApp">
+                    <el-button
+                      slot="append"
+                      icon="el-icon-full-screen"
+                      @click="onCamera('monthSequence')"
+                      v-if="isApp"
+                    >
                     </el-button>
                   </el-input>
                 </div>
 
                 <div class="input-row">
                   <div class="input-label">车架号</div>
-                  <el-input v-model="frameNumber" size="small" class="input-field">
+                  <el-input
+                    v-model="frameNumber"
+                    size="small"
+                    class="input-field"
+                  >
                     <el-button
-                        slot="append" style="margin-right: 5px" icon="el-icon-search"
-                        @click="handleFrameNumberSearch"
+                      slot="append"
+                      style="margin-right: 5px"
+                      icon="el-icon-search"
+                      @click="handleFrameNumberSearch"
                     >
                     </el-button>
-                    <el-button slot="append" icon="el-icon-full-screen" @click="onCamera('vin')" v-if="isApp">
+                    <el-button
+                      slot="append"
+                      icon="el-icon-full-screen"
+                      @click="onCamera('vin')"
+                      v-if="isApp"
+                    >
                     </el-button>
                   </el-input>
                 </div>
@@ -92,45 +120,80 @@
         <div class="section-header">
           <span class="section-title">检验项</span>
           <el-radio-group v-model="showIsConfirm" size="small">
-            <el-radio-button label='0'>未关闭</el-radio-button>
-            <el-radio-button label='1'>已关闭</el-radio-button>
+            <el-radio-button label="0">未关闭</el-radio-button>
+            <el-radio-button label="1">已关闭</el-radio-button>
           </el-radio-group>
         </div>
         <div class="problem-list">
           <div
-              v-for="(inspection, index) in filteredInspectionList"
-              :key="inspection.dispositionId" class="problem-item"
-              @click="(customDisable(inspection) || inspection.testAttribute === 'OK') === false ? handleOpenDialog(inspection,index,'inspection'): null"
+            v-for="(inspection, index) in filteredInspectionList"
+            :key="inspection.dispositionId"
+            class="problem-item"
+            @click="
+              (customDisable(inspection) ||
+                inspection.testAttribute === 'OK') === false
+                ? handleOpenDialog(inspection, index, 'inspection')
+                : null
+            "
           >
             <div class="problem-content">
               <div class="problem-row">
                 <span class="problem-label">检验项{{ index + 1 }}：</span>
                 <el-input
-                    v-model="inspection.dispositionDesc" class="problem-input"
-                    type="textarea"
-                    autosize
-                    disabled
+                  v-model="inspection.dispositionDesc"
+                  class="problem-input"
+                  type="textarea"
+                  autosize
+                  disabled
                 >
                 </el-input>
-                <el-button type="primary" size="small" @click="pushFeiShu(inspection,'inspection')" class='push-btn' :disabled='inspection.pushStatus === 1'>
+                <el-button
+                  type="primary"
+                  size="small"
+                  @click="pushFeiShu(inspection, 'inspection')"
+                  class="push-btn"
+                  :disabled="inspection.pushStatus === 1"
+                >
                   推送
                 </el-button>
               </div>
               <div class="problem-row">
                 <span class="problem-label">描述：</span>
                 <el-input
-                    v-model="inspection.dxDesc" class="problem-input"
-                    type="textarea"
-                    autosize
-                    disabled
+                  v-model="inspection.dxDesc"
+                  class="problem-input"
+                  type="textarea"
+                  autosize
+                  disabled
                 >
                 </el-input>
+              </div>
+              <div
+                class="problem-row"
+                v-if="inspection.fileList && inspection.fileList.length > 0"
+              >
+                <span class="problem-label">文件：</span>
+                <div class="file-list">
+                  <div
+                    v-for="(file, fileIndex) in inspection.fileList"
+                    :key="fileIndex"
+                    class="file-item"
+                    @click.stop="handleFilePreview(file)"
+                  >
+                    <i :class="getFileIcon(file.name)"></i>
+                    <span class="file-name">{{ file.name }}</span>
+                  </div>
+                </div>
               </div>
               <!--检验结论-->
               <div class="problem-row">
                 <span class="problem-label">检验结论：</span>
                 <div class="radio-group-container">
-                  <el-radio-group disabled v-model="inspection.testAttribute" size="small">
+                  <el-radio-group
+                    disabled
+                    v-model="inspection.testAttribute"
+                    size="small"
+                  >
                     <el-radio label="OK">OK</el-radio>
                     <el-radio label="NG">NG</el-radio>
                   </el-radio-group>
@@ -139,14 +202,22 @@
               <!-- 检验人 -->
               <div class="problem-row">
                 <span class="problem-label">检验人：</span>
-                <el-input v-model="inspection.testBy" class="problem-input" disabled>
+                <el-input
+                  v-model="inspection.testBy"
+                  class="problem-input"
+                  disabled
+                >
                 </el-input>
               </div>
               <!-- 是否处置 -->
               <div class="problem-row" v-if="inspection.testAttribute === 'NG'">
                 <span class="problem-label">是否处置：</span>
                 <div class="radio-group-container">
-                  <el-radio-group v-model="inspection.isHandle" size="small" disabled>
+                  <el-radio-group
+                    v-model="inspection.isHandle"
+                    size="small"
+                    disabled
+                  >
                     <el-radio :label="0">否</el-radio>
                     <el-radio :label="1">是</el-radio>
                   </el-radio-group>
@@ -155,28 +226,36 @@
               <!-- 处置人 -->
               <div class="problem-row" v-if="inspection.testAttribute === 'NG'">
                 <span class="problem-label">处置人：</span>
-                <el-input v-model="inspection.handleBy" class="problem-input" disabled>
+                <el-input
+                  v-model="inspection.handleBy"
+                  class="problem-input"
+                  disabled
+                >
                 </el-input>
               </div>
               <!-- 处置措施 -->
               <div class="problem-row" v-if="inspection.testAttribute === 'NG'">
                 <span class="problem-label">处置措施：</span>
                 <el-input
-                    v-model="inspection.handleReMark" class="problem-input"
-                    type="textarea"
-                    autosize
-                    disabled
+                  v-model="inspection.handleReMark"
+                  class="problem-input"
+                  type="textarea"
+                  autosize
+                  disabled
                 >
                 </el-input>
               </div>
               <!-- 是否关闭 -->
               <div class="problem-row" v-if="inspection.testAttribute === 'NG'">
-                <span style="color: #409EFF" class="problem-label">是否关闭：</span>
+                <span style="color: #409eff" class="problem-label"
+                  >是否关闭：</span
+                >
                 <div class="radio-group-container">
                   <el-radio-group
-                      v-model="inspection.isClose" size="small"
-                      @change="handleInspectionIsCloseChange(inspection)"
-                      :disabled="customDisable(inspection)"
+                    v-model="inspection.isClose"
+                    size="small"
+                    @change="handleInspectionIsCloseChange(inspection)"
+                    :disabled="customDisable(inspection)"
                   >
                     <el-radio :label="0">否</el-radio>
                     <el-radio :label="1">是</el-radio>
@@ -185,26 +264,36 @@
               </div>
               <!-- 确认备注 -->
               <div class="problem-row" v-if="inspection.testAttribute === 'NG'">
-                <span style="color: #409EFF" class="problem-label">确认备注：</span>
+                <span style="color: #409eff" class="problem-label"
+                  >确认备注：</span
+                >
                 <el-input
-                    v-model="inspection.confirmReMark" class="problem-input"
-                    type="textarea"
-                    autosize v-keyboard-focus
-                    :disabled="customDisable(inspection)"
+                  v-model="inspection.confirmReMark"
+                  class="problem-input"
+                  type="textarea"
+                  autosize
+                  v-keyboard-focus
+                  :disabled="customDisable(inspection)"
                 >
                 </el-input>
               </div>
               <!-- 确认人 -->
               <div class="problem-row" v-if="inspection.testAttribute === 'NG'">
-                <span style="color: #409EFF" class="problem-label">确认人：</span>
-                <el-input disabled v-model="inspection.confirmBy" class="problem-input">
+                <span style="color: #409eff" class="problem-label"
+                  >确认人：</span
+                >
+                <el-input
+                  disabled
+                  v-model="inspection.confirmBy"
+                  class="problem-input"
+                >
                 </el-input>
               </div>
             </div>
           </div>
         </div>
       </div>
-      
+
       <!-- 问题区域 -->
       <div class="problem-section">
         <div class="section-header">
@@ -212,21 +301,33 @@
         </div>
         <div class="problem-list">
           <div
-              v-for="(problem, index) in filteredProblemList"
-              :key="problem.questionId" class="problem-item"
-              @click="customDisable(problem)  === false ? handleOpenDialog(problem,index,'problem'): null"
+            v-for="(problem, index) in filteredProblemList"
+            :key="problem.questionId"
+            class="problem-item"
+            @click="
+              customDisable(problem) === false
+                ? handleOpenDialog(problem, index, 'problem')
+                : null
+            "
           >
             <div class="problem-content">
               <div class="problem-row">
                 <span class="problem-label">问题{{ index + 1 }}：</span>
                 <el-input
-                    v-model="problem.question" class="problem-input"
-                    type="textarea"
-                    autosize
-                    disabled
+                  v-model="problem.question"
+                  class="problem-input"
+                  type="textarea"
+                  autosize
+                  disabled
                 >
                 </el-input>
-                <el-button type="primary" size="small" @click="pushFeiShu(problem,'problem')" class='push-btn' :disabled='problem.pushStatus === 1'>
+                <el-button
+                  type="primary"
+                  size="small"
+                  @click="pushFeiShu(problem, 'problem')"
+                  class="push-btn"
+                  :disabled="problem.pushStatus === 1"
+                >
                   推送
                 </el-button>
               </div>
@@ -237,10 +338,16 @@
                   <div class="image-display-container">
                     <div class="image-list-horizontal">
                       <div
-                          v-for="(image, imgIndex) in problem.imageList" :key="imgIndex"
-                          class="image-item" @click="handlePictureCardPreview(image)"
+                        v-for="(image, imgIndex) in problem.imageList"
+                        :key="imgIndex"
+                        class="image-item"
+                        @click="handlePictureCardPreview(image)"
                       >
-                        <img :src="image.url" :alt="image.name" class="displayed-image">
+                        <img
+                          :src="image.url"
+                          :alt="image.name"
+                          class="displayed-image"
+                        />
                       </div>
                     </div>
                   </div>
@@ -249,14 +356,22 @@
               <!-- 检验人 -->
               <div class="problem-row">
                 <span class="problem-label">检验人：</span>
-                <el-input v-model="problem.testBy" class="problem-input" disabled>
+                <el-input
+                  v-model="problem.testBy"
+                  class="problem-input"
+                  disabled
+                >
                 </el-input>
               </div>
               <!-- 是否处置 -->
               <div class="problem-row">
                 <span class="problem-label">是否处置：</span>
                 <div class="radio-group-container">
-                  <el-radio-group v-model="problem.isHandle" size="small" disabled>
+                  <el-radio-group
+                    v-model="problem.isHandle"
+                    size="small"
+                    disabled
+                  >
                     <el-radio :label="0">否</el-radio>
                     <el-radio :label="1">是</el-radio>
                   </el-radio-group>
@@ -265,16 +380,22 @@
               <!-- 处置人 -->
               <div class="problem-row">
                 <span class="problem-label">处置人：</span>
-                <el-input v-model="problem.handleBy" class="problem-input" disabled>
+                <el-input
+                  v-model="problem.handleBy"
+                  class="problem-input"
+                  disabled
+                >
                 </el-input>
               </div>
               <!-- 处置措施 -->
               <div class="problem-row">
                 <span class="problem-label">处置措施：</span>
                 <el-input
-                    v-model="problem.handleReMark" class="problem-input"
-                    type="textarea"
-                    autosize disabled
+                  v-model="problem.handleReMark"
+                  class="problem-input"
+                  type="textarea"
+                  autosize
+                  disabled
                 >
                 </el-input>
               </div>
@@ -285,10 +406,16 @@
                   <div class="image-display-container">
                     <div class="image-list-horizontal">
                       <div
-                          v-for="(image, imgIndex) in problem.handImageList" :key="imgIndex"
-                          class="image-item" @click="handlePictureCardPreview(image)"
+                        v-for="(image, imgIndex) in problem.handImageList"
+                        :key="imgIndex"
+                        class="image-item"
+                        @click="handlePictureCardPreview(image)"
                       >
-                        <img :src="image.url" :alt="image.name" class="displayed-image">
+                        <img
+                          :src="image.url"
+                          :alt="image.name"
+                          class="displayed-image"
+                        />
                       </div>
                     </div>
                   </div>
@@ -296,12 +423,17 @@
               </div>
               <!-- 是否关闭 -->
               <div class="problem-row">
-                <span style="color: #409EFF" class="problem-label">是否关闭：</span>
+                <span style="color: #409eff" class="problem-label"
+                  >是否关闭：</span
+                >
                 <div class="radio-group-container">
                   <el-radio-group
-                      v-model="problem.isClose" size="small"
-                      @change="handleIsCloseChange(problem)"
-                      :disabled="originalData.orderStatus === 3 || problem.isHandle !== 1"
+                    v-model="problem.isClose"
+                    size="small"
+                    @change="handleIsCloseChange(problem)"
+                    :disabled="
+                      originalData.orderStatus === 3 || problem.isHandle !== 1
+                    "
                   >
                     <el-radio :label="0">否</el-radio>
                     <el-radio :label="1">是</el-radio>
@@ -310,18 +442,24 @@
               </div>
               <!-- 确认备注 -->
               <div class="problem-row">
-                <span style="color: #409EFF" class="problem-label">确认备注：</span>
+                <span style="color: #409eff" class="problem-label"
+                  >确认备注：</span
+                >
                 <el-input
-                    v-model="problem.confirmReMark" class="problem-input"
-                    type="textarea"
-                    autosize v-keyboard-focus
-                    :disabled="customDisable(problem)"
+                  v-model="problem.confirmReMark"
+                  class="problem-input"
+                  type="textarea"
+                  autosize
+                  v-keyboard-focus
+                  :disabled="customDisable(problem)"
                 >
                 </el-input>
               </div>
               <!-- 确认图片 -->
               <div class="problem-row">
-                <span style="color: #409EFF" class="problem-label">确认图片：</span>
+                <span style="color: #409eff" class="problem-label"
+                  >确认图片：</span
+                >
                 <div class="image-upload-section">
                   <div class="image-upload-container">
                     <!-- 移动端上传按钮 -->
@@ -333,15 +471,23 @@
                     <div class="image-scroll-container">
                       <div class="image-list-horizontal">
                         <div
-                            v-for="(image, imgIndex) in problem.confirmImageList"
-                            :key="imgIndex" class="image-item"
-                            @click="handleConfirmPictureCardPreview(image)"
+                          v-for="(image, imgIndex) in problem.confirmImageList"
+                          :key="imgIndex"
+                          class="image-item"
+                          @click="handleConfirmPictureCardPreview(image)"
                         >
-                          <img :src="image.url" :alt="image.name" class="uploaded-image">
+                          <img
+                            :src="image.url"
+                            :alt="image.name"
+                            class="uploaded-image"
+                          />
                           <div class="image-actions">
                             <i
-                                class="el-icon-delete" v-if="!customDisable(problem)"
-                                @click.stop="removeSingleConfirmImage(problem, imgIndex)"
+                              class="el-icon-delete"
+                              v-if="!customDisable(problem)"
+                              @click.stop="
+                                removeSingleConfirmImage(problem, imgIndex)
+                              "
                             >
                             </i>
                           </div>
@@ -356,8 +502,14 @@
               </div>
               <!-- 确认人 -->
               <div class="problem-row">
-                <span style="color: #409EFF" class="problem-label">确认人：</span>
-                <el-input disabled v-model="problem.confirmBy" class="problem-input">
+                <span style="color: #409eff" class="problem-label"
+                  >确认人：</span
+                >
+                <el-input
+                  disabled
+                  v-model="problem.confirmBy"
+                  class="problem-input"
+                >
                 </el-input>
               </div>
             </div>
@@ -368,22 +520,29 @@
 
     <!-- 底部固定按钮 -->
     <div class="fixed-action-buttons">
-      <el-button type="primary" @click="submit" class="submit-btn">提交</el-button>
+      <el-button type="primary" @click="submit" class="submit-btn"
+        >提交</el-button
+      >
     </div>
     <!-- 图片预览对话框 -->
-    <el-dialog :visible.sync="dialogVisible" :append-to-body="true" fullscreen @close="resetPreviewTransform">
+    <el-dialog
+      :visible.sync="dialogVisible"
+      :append-to-body="true"
+      fullscreen
+      @close="resetPreviewTransform"
+    >
       <div class="image-preview-container" @wheel.prevent="handleWheel">
         <img
-            ref="previewImage"
-            :src="dialogImageUrl"
-            alt=""
-            class="preview-image"
-            :style="previewImageStyle"
-            @load="onImageLoad"
-            @touchstart="handleTouchStart"
-            @touchmove="handleTouchMove"
-            @touchend="handleTouchEnd"
-        >
+          ref="previewImage"
+          :src="dialogImageUrl"
+          alt=""
+          class="preview-image"
+          :style="previewImageStyle"
+          @load="onImageLoad"
+          @touchstart="handleTouchStart"
+          @touchmove="handleTouchMove"
+          @touchend="handleTouchEnd"
+        />
       </div>
       <div class="image-preview-toolbar">
         <button @click="zoomIn" class="toolbar-btn">+</button>
@@ -393,24 +552,32 @@
       </div>
     </el-dialog>
     <!-- 检验项编辑对话框 -->
-    <el-dialog :visible.sync="dialogTestVisible" :append-to-body="true" fullscreen :showClose='true' style='padding: 0'>
+    <el-dialog
+      :visible.sync="dialogTestVisible"
+      :append-to-body="true"
+      fullscreen
+      :showClose="true"
+      style="padding: 0"
+    >
       <div class="problem-row">
         <span class="problem-label">检验项{{ dialogIndex + 1 }}：</span>
         <el-input
-            v-model="dialogTestData.dispositionDesc" class="problem-input"
-            type="textarea"
-            autosize
-            disabled
+          v-model="dialogTestData.dispositionDesc"
+          class="problem-input"
+          type="textarea"
+          autosize
+          disabled
         >
         </el-input>
       </div>
       <div class="problem-row">
         <span class="problem-label">描述：</span>
         <el-input
-            v-model="dialogTestData.dxDesc" class="problem-input"
-            type="textarea"
-            autosize
-            disabled
+          v-model="dialogTestData.dxDesc"
+          class="problem-input"
+          type="textarea"
+          autosize
+          disabled
         >
         </el-input>
       </div>
@@ -418,7 +585,11 @@
       <div class="problem-row">
         <span class="problem-label">检验结论：</span>
         <div class="radio-group-container">
-          <el-radio-group disabled v-model="dialogTestData.testAttribute" size="small">
+          <el-radio-group
+            disabled
+            v-model="dialogTestData.testAttribute"
+            size="small"
+          >
             <el-radio label="OK">OK</el-radio>
             <el-radio label="NG">NG</el-radio>
           </el-radio-group>
@@ -427,14 +598,22 @@
       <!-- 检验人 -->
       <div class="problem-row">
         <span class="problem-label">检验人：</span>
-        <el-input v-model="dialogTestData.testBy" class="problem-input" disabled>
+        <el-input
+          v-model="dialogTestData.testBy"
+          class="problem-input"
+          disabled
+        >
         </el-input>
       </div>
       <!-- 是否处置 -->
       <div class="problem-row">
         <span class="problem-label">是否处置：</span>
         <div class="radio-group-container">
-          <el-radio-group v-model="dialogTestData.isHandle" size="small" disabled>
+          <el-radio-group
+            v-model="dialogTestData.isHandle"
+            size="small"
+            disabled
+          >
             <el-radio :label="0">否</el-radio>
             <el-radio :label="1">是</el-radio>
           </el-radio-group>
@@ -443,27 +622,33 @@
       <!-- 处置人 -->
       <div class="problem-row">
         <span class="problem-label">处置人：</span>
-        <el-input v-model="dialogTestData.handleBy" class="problem-input" disabled>
+        <el-input
+          v-model="dialogTestData.handleBy"
+          class="problem-input"
+          disabled
+        >
         </el-input>
       </div>
       <!-- 处置措施 -->
       <div class="problem-row">
         <span class="problem-label">处置措施：</span>
         <el-input
-            v-model="dialogTestData.handleReMark" class="problem-input"
-            type="textarea"
-            autosize
-            disabled
+          v-model="dialogTestData.handleReMark"
+          class="problem-input"
+          type="textarea"
+          autosize
+          disabled
         >
         </el-input>
       </div>
       <!-- 是否关闭 -->
       <div class="problem-row">
-        <span style="color: #409EFF" class="problem-label">是否关闭：</span>
+        <span style="color: #409eff" class="problem-label">是否关闭：</span>
         <div class="radio-group-container">
           <el-radio-group
-              v-model="dialogTestData.isClose" size="small"
-              @change="handleInspectionIsCloseChange(dialogTestData)"
+            v-model="dialogTestData.isClose"
+            size="small"
+            @change="handleInspectionIsCloseChange(dialogTestData)"
           >
             <el-radio :label="0">否</el-radio>
             <el-radio :label="1">是</el-radio>
@@ -472,34 +657,51 @@
       </div>
       <!-- 确认备注 -->
       <div class="problem-row">
-        <span style="color: #409EFF" class="problem-label">确认备注：</span>
+        <span style="color: #409eff" class="problem-label">确认备注：</span>
         <el-input
-            v-model="dialogTestData.confirmReMark" class="problem-input"
-            type="textarea"
-            autosize v-keyboard-focus
+          v-model="dialogTestData.confirmReMark"
+          class="problem-input"
+          type="textarea"
+          autosize
+          v-keyboard-focus
         >
         </el-input>
       </div>
       <!-- 确认人 -->
       <div class="problem-row">
-        <span style="color: #409EFF" class="problem-label">确认人：</span>
-        <el-input disabled v-model="dialogTestData.confirmBy" class="problem-input">
+        <span style="color: #409eff" class="problem-label">确认人：</span>
+        <el-input
+          disabled
+          v-model="dialogTestData.confirmBy"
+          class="problem-input"
+        >
         </el-input>
       </div>
       <div class="fixed-action-buttons">
-        <el-button type="primary" @click="handleCloseDialog('ConfirmInspection')" class="save-btn">保存并返回
+        <el-button
+          type="primary"
+          @click="handleCloseDialog('ConfirmInspection')"
+          class="save-btn"
+          >保存并返回
         </el-button>
       </div>
     </el-dialog>
     <!-- 问题项编辑对话框 -->
-    <el-dialog :visible.sync="dialogProblemVisible" :append-to-body="true" fullscreen :showClose='true' style='padding: 0'>
+    <el-dialog
+      :visible.sync="dialogProblemVisible"
+      :append-to-body="true"
+      fullscreen
+      :showClose="true"
+      style="padding: 0"
+    >
       <div class="problem-row">
         <span class="problem-label">问题{{ dialogIndex + 1 }}：</span>
         <el-input
-            v-model="dialogProblemData.question" class="problem-input"
-            type="textarea"
-            autosize
-            disabled
+          v-model="dialogProblemData.question"
+          class="problem-input"
+          type="textarea"
+          autosize
+          disabled
         >
         </el-input>
       </div>
@@ -510,10 +712,16 @@
           <div class="image-display-container">
             <div class="image-list-horizontal">
               <div
-                  v-for="(image, imgIndex) in dialogProblemData.imageList" :key="imgIndex"
-                  class="image-item" @click="handlePictureCardPreview(image)"
+                v-for="(image, imgIndex) in dialogProblemData.imageList"
+                :key="imgIndex"
+                class="image-item"
+                @click="handlePictureCardPreview(image)"
               >
-                <img :src="image.url" :alt="image.name" class="displayed-image">
+                <img
+                  :src="image.url"
+                  :alt="image.name"
+                  class="displayed-image"
+                />
               </div>
             </div>
           </div>
@@ -522,14 +730,22 @@
       <!-- 检验人 -->
       <div class="problem-row">
         <span class="problem-label">检验人：</span>
-        <el-input v-model="dialogProblemData.testBy" class="problem-input" disabled>
+        <el-input
+          v-model="dialogProblemData.testBy"
+          class="problem-input"
+          disabled
+        >
         </el-input>
       </div>
       <!-- 是否处置 -->
       <div class="problem-row">
         <span class="problem-label">是否处置：</span>
         <div class="radio-group-container">
-          <el-radio-group v-model="dialogProblemData.isHandle" size="small" disabled>
+          <el-radio-group
+            v-model="dialogProblemData.isHandle"
+            size="small"
+            disabled
+          >
             <el-radio :label="0">否</el-radio>
             <el-radio :label="1">是</el-radio>
           </el-radio-group>
@@ -538,16 +754,22 @@
       <!-- 处置人 -->
       <div class="problem-row">
         <span class="problem-label">处置人：</span>
-        <el-input v-model="dialogProblemData.handleBy" class="problem-input" disabled>
+        <el-input
+          v-model="dialogProblemData.handleBy"
+          class="problem-input"
+          disabled
+        >
         </el-input>
       </div>
       <!-- 处置措施 -->
       <div class="problem-row">
         <span class="problem-label">处置措施：</span>
         <el-input
-            v-model="dialogProblemData.handleReMark" class="problem-input"
-            type="textarea"
-            autosize disabled
+          v-model="dialogProblemData.handleReMark"
+          class="problem-input"
+          type="textarea"
+          autosize
+          disabled
         >
         </el-input>
       </div>
@@ -558,10 +780,16 @@
           <div class="image-display-container">
             <div class="image-list-horizontal">
               <div
-                  v-for="(image, imgIndex) in dialogProblemData.handImageList" :key="imgIndex"
-                  class="image-item" @click="handlePictureCardPreview(image)"
+                v-for="(image, imgIndex) in dialogProblemData.handImageList"
+                :key="imgIndex"
+                class="image-item"
+                @click="handlePictureCardPreview(image)"
               >
-                <img :src="image.url" :alt="image.name" class="displayed-image">
+                <img
+                  :src="image.url"
+                  :alt="image.name"
+                  class="displayed-image"
+                />
               </div>
             </div>
           </div>
@@ -569,11 +797,12 @@
       </div>
       <!-- 是否关闭 -->
       <div class="problem-row">
-        <span style="color: #409EFF" class="problem-label">是否关闭：</span>
+        <span style="color: #409eff" class="problem-label">是否关闭：</span>
         <div class="radio-group-container">
           <el-radio-group
-              v-model="dialogProblemData.isClose" size="small"
-              @change="handleIsCloseChange(dialogProblemData)"
+            v-model="dialogProblemData.isClose"
+            size="small"
+            @change="handleIsCloseChange(dialogProblemData)"
           >
             <el-radio :label="0">否</el-radio>
             <el-radio :label="1">是</el-radio>
@@ -582,21 +811,26 @@
       </div>
       <!-- 确认备注 -->
       <div class="problem-row">
-        <span style="color: #409EFF" class="problem-label">确认备注：</span>
+        <span style="color: #409eff" class="problem-label">确认备注：</span>
         <el-input
-            v-model="dialogProblemData.confirmReMark" class="problem-input"
-            type="textarea"
-            autosize v-keyboard-focus
+          v-model="dialogProblemData.confirmReMark"
+          class="problem-input"
+          type="textarea"
+          autosize
+          v-keyboard-focus
         >
         </el-input>
       </div>
       <!-- 确认图片 -->
       <div class="problem-row">
-        <span style="color: #409EFF" class="problem-label">确认图片：</span>
+        <span style="color: #409eff" class="problem-label">确认图片：</span>
         <div class="image-upload-section">
           <div class="image-upload-container">
             <!-- 移动端上传按钮 -->
-            <div class="mobile-upload-btn" @click="handleMobileUpload(dialogProblemData.questionId)">
+            <div
+              class="mobile-upload-btn"
+              @click="handleMobileUpload(dialogProblemData.questionId)"
+            >
               <i class="el-icon-plus"></i>
               <div class="upload-text">添加图片</div>
             </div>
@@ -605,15 +839,25 @@
             <div class="image-scroll-container">
               <div class="image-list-horizontal">
                 <div
-                    v-for="(image, imgIndex) in dialogProblemData.confirmImageList"
-                    :key="imgIndex" class="image-item"
-                    @click="handleConfirmPictureCardPreview(image)"
+                  v-for="(
+                    image, imgIndex
+                  ) in dialogProblemData.confirmImageList"
+                  :key="imgIndex"
+                  class="image-item"
+                  @click="handleConfirmPictureCardPreview(image)"
                 >
-                  <img :src="image.url" :alt="image.name" class="uploaded-image">
+                  <img
+                    :src="image.url"
+                    :alt="image.name"
+                    class="uploaded-image"
+                  />
                   <div class="image-actions">
                     <i
-                        class="el-icon-delete" v-if="!customDisable(dialogProblemData)"
-                        @click.stop="removeSingleConfirmImage(dialogProblemData, imgIndex)"
+                      class="el-icon-delete"
+                      v-if="!customDisable(dialogProblemData)"
+                      @click.stop="
+                        removeSingleConfirmImage(dialogProblemData, imgIndex)
+                      "
                     >
                     </i>
                   </div>
@@ -625,12 +869,20 @@
       </div>
       <!-- 确认人 -->
       <div class="problem-row">
-        <span style="color: #409EFF" class="problem-label">确认人：</span>
-        <el-input disabled v-model="dialogProblemData.confirmBy" class="problem-input">
+        <span style="color: #409eff" class="problem-label">确认人：</span>
+        <el-input
+          disabled
+          v-model="dialogProblemData.confirmBy"
+          class="problem-input"
+        >
         </el-input>
       </div>
       <div class="fixed-action-buttons">
-        <el-button type="primary" @click="handleCloseDialog('ConfirmQuestion')" class="save-btn">保存并返回
+        <el-button
+          type="primary"
+          @click="handleCloseDialog('ConfirmQuestion')"
+          class="save-btn"
+          >保存并返回
         </el-button>
       </div>
     </el-dialog>
@@ -641,855 +893,971 @@
 import keyboardMixin from "@/utils/keyboardMixin";
 
 export default {
-    name: 'HomeView',
-    mixins: [keyboardMixin],
-    components: {},
-    data() {
-        return {
-            // 判断是否是手机
-            isApp: false,
-            isCollapsed: true,
-            searchTimer: null, // 防抖定时器
-            currentWorkstation: '',
-            currentOrder: '',
-            monthlySequence: '',
-            frameNumber: '',
-            modelCode: '',
+  name: "HomeView",
+  mixins: [keyboardMixin],
+  components: {},
+  data() {
+    return {
+      // 判断是否是手机
+      isApp: false,
+      isCollapsed: true,
+      searchTimer: null, // 防抖定时器
+      currentWorkstation: "",
+      currentOrder: "",
+      monthlySequence: "",
+      frameNumber: "",
+      modelCode: "",
 
-            // 新增数据
-            tableMaxHeight: 300,
-            inspectionList: [],
-            problemList: [],
+      // 新增数据
+      tableMaxHeight: 300,
+      inspectionList: [],
+      problemList: [],
 
-            // 图片上传相关
-            dialogImageUrl: '',
-            dialogVisible: false,
+      // 图片上传相关
+      dialogImageUrl: "",
+      dialogVisible: false,
 
-            // 图片预览缩放相关
-            previewScale: 1,
-            previewTranslateX: 0,
-            previewTranslateY: 0,
-            startTouchDistance: 0,
-            startTouchScale: 1,
+      // 图片预览缩放相关
+      previewScale: 1,
+      previewTranslateX: 0,
+      previewTranslateY: 0,
+      startTouchDistance: 0,
+      startTouchScale: 1,
 
-            // 新增：存储查询返回的原始数据
-            originalData: {
-                workStation: "",
-                wipOrderNo: "",
-                productNo: "",
-                monthSequence: "",
-                vin: "",
-                dispositionItem: [],
-                questionItem: []
-            },
+      // 新增：存储查询返回的原始数据
+      originalData: {
+        workStation: "",
+        wipOrderNo: "",
+        productNo: "",
+        monthSequence: "",
+        vin: "",
+        dispositionItem: [],
+        questionItem: [],
+      },
 
-            // 单项操作
-            dialogTestData: {},
-            dialogTestVisible: false,
-            dialogProblemData: {},
-            dialogProblemVisible: false,
-            dialogIndex: -1,
-            pushFlag: false,
+      // 单项操作
+      dialogTestData: {},
+      dialogTestVisible: false,
+      dialogProblemData: {},
+      dialogProblemVisible: false,
+      dialogIndex: -1,
+      pushFlag: false,
 
-            showIsConfirm: '0'
-        }
-    },
-    mounted() {
-        this.isApp = this.isAppEnvironment();
+      showIsConfirm: "0",
+    };
+  },
+  mounted() {
+    this.isApp = this.isAppEnvironment();
 
-        // 设置表格最大高度为屏幕的1/3
-        this.setTableMaxHeight();
-        window.addEventListener('resize', this.setTableMaxHeight);
-    },
-    beforeDestroy() {
-        window.removeEventListener('resize', this.setTableMaxHeight);
-        // 清理防抖定时器
-        if (this.searchTimer) {
-            clearTimeout(this.searchTimer);
-        }
-    },
-    computed: {
-        // 计算单据状态
-        documentStatus() {
-            return this.originalData.orderStatus === 3 ? '已关闭' : '检验中';
-        },
-
-        // 计算检验结果
-        inspectionResult() {
-            return this.problemList.every(item => item.isClose === 1) ? '合格' : '不合格';
-        },
-
-        // 过滤后的检验项列表
-        filteredInspectionList() {
-            if (this.showIsConfirm === '0') {
-                // 显示未关闭的项目（排除 testAttribute 为 'OK' 的项目）
-                return this.inspectionList.filter(inspection =>
-                    inspection.isClose !== 1 && inspection.testAttribute !== 'OK'
-                );
-            } else {
-                // 显示已关闭的项目
-                return this.inspectionList.filter(inspection =>
-                    inspection.isClose === 1 || inspection.testAttribute === 'OK'
-                );
-            }
-        },
-
-        // 过滤后的问题列表
-        filteredProblemList() {
-            if (this.showIsConfirm === '0') {
-                // 显示未关闭的问题
-                return this.problemList.filter(problem => problem.isClose !== 1);
-            } else {
-                // 显示已关闭的问题
-                return this.problemList.filter(problem => problem.isClose === 1);
-            }
-        },
-
-        // 图片预览样式计算属性
-        previewImageStyle() {
-            return {
-                transform: `scale(${this.previewScale}) translate(${this.previewTranslateX}px, ${this.previewTranslateY}px)`,
-                transition: this.isTransitioning ? 'transform 0.2s ease' : 'none'
-            };
-        }
-    },
-    methods: {
-        handleCloseDialog(type) {
-            let saveData = {}
-            if (type === 'ConfirmInspection') {
-
-                this.dialogTestVisible = false;
-                console.log(this.dialogTestData, 'HandleInspection')
-                let aa = {
-                    ...this.dialogTestData
-                }
-                const dispositionId = aa.dispositionId
-                const isClose = aa.isClose
-                const confirmReMark = aa.confirmReMark
-                console.log(dispositionId, 'dispositionId', isClose, 'isClose', confirmReMark, 'confirmReMark')
-                saveData = {
-                    flag: type,
-                    id: dispositionId,
-                    isConfirm: isClose,
-                    confirmReMark: confirmReMark,
-                }
-                // 保存数据
-                window.InspectionOnlineSingleSave(saveData, (res) => {
-                    this.inspectionList.find(item => item.dispositionId === saveData.id).confirmBy = res.confirmBy;
-
-                })
-            } else if (type === 'ConfirmQuestion') {
-                this.dialogProblemVisible = false;
-                console.log(this.dialogProblemData)
-                let aa = {
-                    ...this.dialogProblemData
-                }
-                const questionId = aa.questionId
-                const isClose = aa.isClose
-                const confirmReMark = aa.confirmReMark
-                const confirmImgs = aa.confirmImgs
-                console.log(questionId, 'questionId', isClose, 'isClose', confirmReMark, 'confirmReMark', confirmImgs, 'confirmImgs')
-                saveData = {
-                    flag: type,
-                    id: questionId,
-                    isConfirm: isClose,
-                    confirmReMark: confirmReMark,
-                    confirmImg: confirmImgs,
-                }
-                // 保存数据
-                window.InspectionOnlineSingleSave(saveData, (res) => {
-                    this.problemList.find(item => item.questionId === saveData.id).confirmBy = res.confirmBy;
-                })
-            }
-            console.log(saveData, 'saveData')
-
-        },
-        handleOpenDialog(item, index, type) {
-            if (this.pushFlag) {
-                this.pushFlag = false
-                return
-            }
-            this.dialogIndex = index;
-            if (type === 'inspection') {
-                this.dialogTestData = item;
-                // 避免图片预览被覆盖
-                this.dialogTestVisible = this.dialogVisible !== true;
-                console.log(this.dialogTestData)
-            } else if (type === 'problem') {
-                this.dialogProblemData = item;
-                // 避免图片预览被覆盖
-                this.dialogProblemVisible = this.dialogVisible !== true;
-                console.log(this.dialogProblemData)
-            }
-        },
-        // 推送飞书
-        pushFeiShu(data, type) {
-            this.pushFlag = true
-            this.$msgbox({
-                title: '推送飞书',
-                message: '是否推送飞书？再次推送需要退出重进',
-                showCancelButton: true,
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
-                type: 'warning',
-                customClass: 'my-message-box',
-            }).then(() => {
-                let pushData = {
-                    ...this.originalData
-                }
-                if (type === 'inspection') {
-                    pushData = {
-                        ...pushData,
-                        dispositionItem: this.originalData.dispositionItem.filter(
-                            item => item.dispositionId === data.dispositionId
-                                && item.testAttribute !== 'OK'
-                                && item.dxDesc !== ''
-                                && item.dispositionDesc !== ''),
-                        questionItem: []
-                    }
-                    data.pushStatus = 1
-                } else if (type === 'problem') {
-                    pushData = {
-                        ...pushData,
-                        questionItem: this.originalData.questionItem.filter(item => item.questionId === data.questionId && item.question !== ''),
-                        dispositionItem: []
-                    }
-                    data.pushStatus = 1
-                }
-                console.log(pushData, '推送飞书')
-                window.pushFeiShu(pushData, (res) => {
-                    if (res.code === '0') {
-                        this.$message({
-                            message: '推送飞书成功',
-                            type: 'success',
-                            duration: 500,
-                            showClose: true
-                        })
-                    } else {
-                        this.$message({
-                            message: '推送飞书失败',
-                            type: 'error',
-                            duration: 500,
-                            showClose: true
-                        })
-                    }
-                })
-            }).catch(() => {
-                this.$message({
-                    type: 'info',
-                    message: '已取消推送',
-                });
-            });
-
-        },
-        customDisable(item) {
-            return this.originalData.orderStatus === 3 || item.isHandle !== 1 || (item.confirmBy !== window.Operator && item.confirmBy !== '')
-        },
-        // 扫码
-        onCamera(type) {
-            window.parent.OpenCamera &&
-            window.parent.OpenCamera((res) => {
-                if (res.code == 200) {
-                    this.currentOrder = ''
-                    this.monthlySequence = ''
-                    this.frameNumber = ''
-                    if (type === 'wipOrderNo') {
-                        this.currentOrder = res.data
-                        this.handleOrderSearch()
-                    } else if (type === 'vin') {
-                        this.frameNumber = res.data
-                        this.handleFrameNumberSearch()
-                    } else if (type === 'monthSequence') {
-                        this.monthlySequence = res.data
-                        this.handleMonthlySequenceSearch()
-                    } else {
-                        console.log('未定义的扫码类型');
-                    }
-                }
-            });
-        },
-        isAppEnvironment() {
-            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-            return /iPad|iPhone|iPod/.test(userAgent) ||   // iOS devices
-                /Android/.test(userAgent)
-        },
-        // 查询检验项和问题
-        getData(value) {
-            window.dataItem(value, (data) => {
-                console.log(data, '获取检验项和问题');
-                if (data.code === '0') {
-                    // 保存原始数据
-                    this.originalData = {...data};
-                    // 剔除code和msg
-                    delete this.originalData.code;
-                    delete this.originalData.msg;
-
-                    // 更新界面数据
-                    this.updateUIWithData(data);
-                    this.$message({
-                        message: '查询成功',
-                        type: 'success',
-                        duration: 500,
-                        showClose: true
-                    });
-                } else {
-                    this.$message({
-                        message: data.msg || '查询失败',
-                        type: 'error',
-                        duration: 500,
-                        showClose: true
-                    });
-                }
-            });
-        },
-        // 使用查询返回的数据更新界面
-        updateUIWithData(data) {
-            // 更新输入框数据
-            this.currentOrder = data.wipOrderNo || '';
-            this.monthlySequence = data.monthSequence || '';
-            this.frameNumber = data.vin || '';
-            this.modelCode = data.productNo || '';
-
-            // 更新检验项目表格数据
-            this.inspectionList = (data.dispositionItem || []).map((item, index) => {
-                let testAttribute = item.testAttribute === 'OK' ? 'OK' : 'NG';
-                return {
-                    ...item,
-                    index: index + 1,
-                    inspectionItem: item.dispositionDesc,
-                    testAttribute: testAttribute,
-                    pushStatus: 0
-                };
-            });
-
-            // 更新问题描述数据
-            this.problemList = (data.questionItem || [])
-                .map(item => {
-                    // 处理检验图片URL，将字符串分割为数组
-                    const imageUrls = item.imgs ? item.imgs.split(',').filter(url => url.trim() !== '') : [];
-                    const imageList = imageUrls.map(url => ({
-                        name: url.split('/').pop(),
-                        url: url
-                    }));
-
-                    // 处理复检图片URL
-                    const handImageUrls = item.handImgs ? item.handImgs.split(',').filter(url => url.trim() !== '') : [];
-                    const handImageList = handImageUrls.map(url => ({
-                        name: url.split('/').pop(),
-                        url: url
-                    }));
-
-                    // 处理确认图片URL
-                    const confirmImageUrls = item.confirmImgs ? item.confirmImgs.split(',').filter(url => url.trim() !== '') : [];
-                    const confirmImageList = confirmImageUrls.map(url => ({
-                        name: url.split('/').pop(),
-                        url: url
-                    }));
-
-                    return {
-                        ...item,
-                        imageList: imageList,
-                        handImageList: handImageList,
-                        confirmImageList: confirmImageList,
-                        // 确保isHandle是数字类型
-                        isHandle: item.isHandle ? Number(item.isHandle) : 0,
-                        // 确保isClose是数字类型
-                        isClose: item.isClose ? Number(item.isClose) : 0,
-                        pushStatus: 0
-                    };
-                });
-        },
-        toggleCollapse() {
-            this.isCollapsed = !this.isCollapsed;
-        },
-        // 构建查询参数
-        buildQueryParams(type) {
-            return {
-                wipOrderNo: type === 'wipOrderNo' ? this.currentOrder : '',
-                vin: type === 'vin' ? this.frameNumber : '',
-                monthSequence: type === 'monthSequence' ? this.monthlySequence : '',
-                workStation: '',
-            };
-        },
-        // 处理订单搜索
-        // 处理订单搜索
-        handleOrderSearch() {
-            // 清除之前的定时器
-            if (this.searchTimer) {
-                clearTimeout(this.searchTimer);
-            }
-
-            // 设置新的定时器（500ms后执行）
-            this.searchTimer = setTimeout(() => {
-                const params = this.buildQueryParams('wipOrderNo');
-                this.getData(params);
-            }, 500);
-        },
-        // 处理月顺序号搜索
-        handleMonthlySequenceSearch() {
-            // 清除之前的定时器
-            if (this.searchTimer) {
-                clearTimeout(this.searchTimer);
-            }
-
-            // 设置新的定时器（500ms后执行）
-            this.searchTimer = setTimeout(() => {
-                const params = this.buildQueryParams('monthSequence');
-                this.getData(params);
-            }, 500);
-        },
-        // 处理车架号搜索
-        handleFrameNumberSearch() {
-            // 清除之前的定时器
-            if (this.searchTimer) {
-                clearTimeout(this.searchTimer);
-            }
-
-            // 设置新的定时器（500ms后执行）
-            this.searchTimer = setTimeout(() => {
-                const params = this.buildQueryParams('vin');
-                this.getData(params);
-            }, 500);
-        },
-        // 处理检验项是否关闭变化
-        handleInspectionIsCloseChange(inspection) {
-            // 更新原始数据
-            const originalInspection = this.originalData.dispositionItem.find(
-                p => p.dispositionId === inspection.dispositionId
-            );
-            if (originalInspection) {
-                originalInspection.isClose = inspection.isClose;
-            }
-        },
-        // 处理问题是否关闭变化
-        handleIsCloseChange(problem) {
-            // 更新原始数据
-            const originalProblem = this.originalData.questionItem.find(
-                p => p.questionId === problem.questionId
-            );
-            if (originalProblem) {
-                originalProblem.isClose = problem.isClose;
-            }
-        },
-        // 设置表格最大高度
-        setTableMaxHeight() {
-            this.tableMaxHeight = window.innerHeight / 3;
-        },
-        // 图片转Base64
-        fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-            });
-        },
-        // 上传单张确认图片
-        async uploadSingleConfirmImage(base64Data, questionId) {
-            return new Promise((resolve, reject) => {
-                const params = {
-                    url: [base64Data],
-                    id: questionId,
-                    FilePicker: base64Data
-                };
-
-                window.saveImgFils(params, (response) => {
-                    if (response.code === 0) {
-                        resolve(response.data);
-                    } else {
-                        reject(new Error(response.msg || '图片上传失败'));
-                    }
-                });
-            });
-        },
-        // 移除单张确认图片
-        removeSingleConfirmImage(problem, imgIndex) {
-            // 从确认图片列表中移除
-            problem.confirmImageList.splice(imgIndex, 1);
-            // 更新confirmImgs字段
-            problem.confirmImgs = problem.confirmImageList.map(f => f.url).join(',');
-            // 同步到原始数据
-            this.syncProblemData();
-
-            this.$message({
-                type: 'success',
-                message: '删除成功!'
-            });
-        },
-        handlePictureCardPreview(file) {
-            this.dialogImageUrl = file.url;
-            this.dialogVisible = true;
-        },
-        handleConfirmPictureCardPreview(file) {
-            this.dialogImageUrl = file.url;
-            this.dialogVisible = true;
-        },
-        // 删除空问题
-        deleteProblem() {
-            const emptyProblem = this.problemList.filter(problem => problem.question.trim() === '');
-            if (emptyProblem.length > 0) {
-                // 循环删除，调用window方法删除远程，过滤本地空问题
-                for (let i = 0; i < emptyProblem.length; i++) {
-                    const problem = emptyProblem[i];
-                    // 调用后台删除接口
-                    window.questionDel({flag: "DelQuestion", questionId: problem.questionId}, (res) => {
-                        console.log('删除空问题:', res);
-                    });
-                }
-                // 从本地列表中过滤掉空问题
-                this.problemList = this.problemList.filter(problem => problem.question.trim() !== '');
-                // 同步到原始数据
-                this.syncProblemData();
-            }
-        },
-        // 保存
-        async save() {
-            this.deleteProblem()
-            try {
-                // 数据同步
-                this.syncProblemData();
-                this.syncInspectionData();
-                const saveData = {
-                    ...this.originalData,
-                    flag: 'Confirm',
-                };
-                console.log('保存数据:', saveData);
-                // 调用保存接口
-                window.InspectionOnlineSaveAndSubmit(saveData, (response) => {
-                    if (response.code === '0') {
-                        this.$message({
-                            message: '保存成功',
-                            type: 'success',
-                            duration: 500,
-                            showClose: true,
-                        });
-                    } else {
-                        this.$message({
-                            message: response.msg || '保存失败',
-                            type: 'error',
-                            duration: 500,
-                            showClose: true,
-                        });
-                    }
-                });
-            } catch (error) {
-                console.error('保存失败:', error);
-                this.$message({
-                    message: '保存失败: ' + error.message,
-                    type: 'error'
-                });
-            }
-        },
-        // 获取未关闭的检验项序号
-        getUnclosedInspectionIndexes() {
-            const unclosedIndexes = [];
-            for (let i = 0; i < this.inspectionList.length; i++) {
-                const inspection = this.inspectionList[i];
-                // 如果项目未关闭且不是OK项，则将其序号加入数组
-                if (inspection.isClose !== 1 && inspection.testAttribute !== 'OK') {
-                    unclosedIndexes.push(i + 1); // 序号从1开始
-                }
-            }
-            return unclosedIndexes;
-        },
-        // 获取未关闭的问题项序号
-        getUnclosedProblemIndexes() {
-            const unclosedIndexes = [];
-            for (let i = 0; i < this.problemList.length; i++) {
-                const problem = this.problemList[i];
-                // 如果项目未关闭，则将其序号加入数组
-                if (problem.isClose !== 1) {
-                    unclosedIndexes.push(i + 1); // 序号从1开始
-                }
-            }
-            return unclosedIndexes;
-        },
-        // 提交
-        async submit() {
-            this.deleteProblem()
-            const unclosedInspectionIndexes = this.getUnclosedInspectionIndexes();
-            const unclosedProblemIndexes = this.getUnclosedProblemIndexes();
-
-            if (unclosedInspectionIndexes.length > 0 || unclosedProblemIndexes.length > 0) {
-                let message = '以下项目未关闭：';
-                if (unclosedInspectionIndexes.length > 0) {
-                    message += ` 检验项[${unclosedInspectionIndexes.join(',')}];`;
-                }
-                if (unclosedProblemIndexes.length > 0) {
-                    message += ` 问题项[${unclosedProblemIndexes.join(',')}];`;
-                }
-                this.$message({
-                    message: message,
-                    type: 'warning',
-                    duration: 5000,
-                    showClose: true,
-                });
-                return;
-            }
-            this.$confirm('是否确认提交?（将无法再修改！）', '提示', {
-                confirmButtonText: '是',
-                cancelButtonText: '否',
-                showClose: false,
-                closeOnPressEscape: false,
-                closeOnClickModal: false,
-                customClass: 'my-message-box' // 添加自定义类名
-            }).then(() => {
-                this.submitData()
-            }).catch(() => {
-            });
-        },
-        // 提交数据
-        submitData() {
-            try {
-                // 确保问题数据同步
-                this.syncProblemData();
-                this.syncInspectionData();
-                const submitData = {
-                    ...this.originalData,
-                    flag: 'ConfirmSubmit',
-                };
-                console.log('提交数据:', submitData);
-                // 调用保存接口
-                window.InspectionOnlineSaveAndSubmit(submitData, (response) => {
-                    if (response.code === '0') {
-                        this.originalData = {}
-                        this.problemList = []
-                        this.inspectionList = []
-                        this.frameNumber = ''
-                        this.monthlySequence = ''
-                        this.modelCode = ''
-                        this.currentOrder = ''
-                        this.$message({
-                            message: '提交成功',
-                            type: 'success',
-                            duration: 500,
-                            showClose: true,
-                        });
-                    } else {
-                        this.$message({
-                            message: response.msg || '提交失败',
-                            type: 'error',
-                            duration: 500,
-                            showClose: true,
-                        });
-                    }
-                });
-            } catch (error) {
-                console.error('提交成功:', error);
-                this.$message({
-                    message: '提交失败: ' + error.message,
-                    type: 'error'
-                });
-            }
-        },
-        syncInspectionData() {
-            this.originalData.dispositionItem = this.inspectionList.map(inspection => {
-                // 查找原始数据中是否已存在该问题
-                const originalInspection = this.originalData.dispositionItem?.find(
-                    p => p.dispositionId === inspection.dispositionId
-                ) || {};
-                return {
-                    ...originalInspection,
-                    dispositionId: inspection.dispositionId,
-                    dispositionDesc: inspection.dispositionDesc,
-                    dxDesc: inspection.dxDesc,
-                    testAttribute: inspection.testAttribute,
-                    handImgs: inspection.handImgs,
-                    handImageList: inspection.handImageList,
-                    confirmImgs: inspection.confirmImgs,
-                    confirmImageList: inspection.confirmImageList,
-                    testBy: inspection.testBy,
-                    isHandle: inspection.isHandle,
-                    handleReMark: inspection.handleReMark,
-                    handleBy: inspection.handleBy,
-                    isClose: inspection.isClose,
-                    confirmReMark: inspection.confirmReMark,
-                    confirmBy: inspection.confirmBy
-                };
-            });
-        },
-        syncProblemData() {
-            this.originalData.questionItem = this.problemList.map(problem => {
-                // 查找原始数据中是否已存在该问题
-                const originalProblem = this.originalData.questionItem?.find(
-                    p => p.questionId === problem.questionId
-                ) || {};
-                return {
-                    ...originalProblem,
-                    questionId: problem.questionId,
-                    question: problem.question,
-                    imgs: problem.imgs,
-                    imageList: problem.imageList,
-                    handImgs: problem.handImgs,
-                    handImageList: problem.handImageList,
-                    confirmImgs: problem.confirmImgs,
-                    confirmImageList: problem.confirmImageList,
-                    testBy: problem.testBy,
-                    isHandle: problem.isHandle,
-                    handleReMark: problem.handleReMark,
-                    handleBy: problem.handleBy,
-                    isClose: problem.isClose,
-                    confirmReMark: problem.confirmReMark,
-                    confirmBy: problem.confirmBy
-                };
-            });
-        },
-        // 移动端图片上传处理
-        handleMobileUpload(questionId) {
-            // 创建两个文件输入元素
-            const fileInputCamera = document.createElement('input');
-            fileInputCamera.type = 'file';
-            fileInputCamera.accept = 'image/*';
-            fileInputCamera.capture = 'environment'; // 强制使用相机
-            fileInputCamera.style.position = 'fixed';
-            fileInputCamera.style.zIndex = '9999';
-
-            const fileInputGallery = document.createElement('input');
-            fileInputGallery.type = 'file';
-            fileInputGallery.accept = 'image/*';
-            fileInputGallery.multiple = true;
-            fileInputGallery.style.position = 'fixed';
-            fileInputGallery.style.zIndex = '9999';
-            const imgLength = this.problemList.find(problem => problem.questionId === questionId)?.confirmImgs?.split(',') || [];
-
-            // 显示选择对话框
-            this.$msgbox({
-                title: '上传图片',
-                message: '请选择图片来源',
-                showCancelButton: true,
-                showClose: false,
-                closeOnPressEscape: false,
-                closeOnClickModal: false,
-                confirmButtonText: '拍照',
-                cancelButtonText: '从相册选择',
-                customClass: 'my-message-box'
-            }).then(() => {
-                // 用户选择拍照
-                fileInputCamera.onchange = async (event) => {
-                    const files = Array.from(event.target.files);
-                    if (files.length + imgLength.length > 30) {
-                        this.$message.warning(`最多只能上传30张图片，您已经选择了${imgLength.length}张，这次选择了${files.length}张`);
-                        return;
-                    }
-                    await this.processSelectedFiles(files, questionId);
-                };
-                fileInputCamera.click();
-            }).catch(() => {
-                // 用户选择从相册选择
-                fileInputGallery.onchange = async (event) => {
-                    const files = Array.from(event.target.files);
-                    if (files.length + imgLength.length > 30) {
-                        this.$message.warning(`最多只能上传30张图片，您已经选择了${imgLength.length}张，这次选择了${files.length}张`);
-                        return;
-                    }
-                    await this.processSelectedFiles(files, questionId);
-                };
-                fileInputGallery.click();
-            });
-        },
-        // 处理选中的文件
-        async processSelectedFiles(files, questionId) {
-            const problem = this.problemList.find(p => p.questionId === questionId);
-            if (!problem) return;
-            this.$message.info('正在上传图片，请稍候...');
-            try {
-                // 处理每个选中的文件
-                for (const file of files) {
-                    // 转换为base64
-                    const base64Data = await this.fileToBase64(file);
-                    // 上传图片
-                    const serverUrl = await this.uploadSingleConfirmImage(base64Data, questionId);
-                    // 创建图片对象并添加到列表
-                    const newImage = {
-                        name: file.name,
-                        url: serverUrl,
-                        raw: file
-                    };
-                    problem.confirmImageList.push(newImage);
-                }
-                problem.confirmImgs = problem.confirmImageList.map(f => f.url).join(',');
-                // 同步到原始数据
-                this.syncProblemData();
-                this.$message.success('图片上传成功');
-            } catch (error) {
-                console.error('图片上传失败:', error);
-                this.$message.error('图片上传失败: ' + error.message);
-            }
-        },
-        // 图片预览缩放相关方法
-        zoomIn() {
-            this.previewScale *= 1.2;
-        },
-        zoomOut() {
-            this.previewScale /= 1.2;
-            if (this.previewScale < 0.1) {
-                this.previewScale = 0.1;
-            }
-        },
-        handleWheel(event) {
-            if (event.deltaY < 0) {
-                this.zoomIn();
-            } else {
-                this.zoomOut();
-            }
-        },
-        resetPreviewTransform() {
-            this.previewScale = 1;
-            this.previewTranslateX = 0;
-            this.previewTranslateY = 0;
-        },
-        fitPreviewImage() {
-            this.resetPreviewTransform();
-            this.$nextTick(() => {
-                const image = this.$refs.previewImage;
-                if (image && image.offsetWidth > 0 && image.offsetHeight > 0) {
-                    const scaleX = window.innerWidth / image.offsetWidth;
-                    const scaleY = window.innerHeight / image.offsetHeight;
-                    this.previewScale = Math.min(scaleX, scaleY);
-                }
-            });
-        },
-        onImageLoad() {
-            this.fitPreviewImage();
-        },
-        // 触摸事件处理
-        handleTouchStart(event) {
-            if (event.touches.length === 2) {
-                // 双指触摸，准备缩放
-                this.startTouchDistance = this.getTouchDistance(event.touches);
-                this.startTouchScale = this.previewScale;
-            }
-        },
-        handleTouchMove(event) {
-            if (event.touches.length === 2) {
-                // 双指移动，执行缩放
-                event.preventDefault();
-                const currentDistance = this.getTouchDistance(event.touches);
-                this.previewScale = this.startTouchScale * (currentDistance / this.startTouchDistance);
-
-                // 限制缩放范围
-                if (this.previewScale < 0.1) {
-                    this.previewScale = 0.1;
-                } else if (this.previewScale > 10) {
-                    this.previewScale = 10;
-                }
-            }
-        },
-        handleTouchEnd() {
-            // 重置触摸距离
-            this.startTouchDistance = 0;
-        },
-        // 计算双指间距离
-        getTouchDistance(touches) {
-            const dx = touches[0].clientX - touches[1].clientX;
-            const dy = touches[0].clientY - touches[1].clientY;
-            return Math.sqrt(dx * dx + dy * dy);
-        }
+    // 设置表格最大高度为屏幕的1/3
+    this.setTableMaxHeight();
+    window.addEventListener("resize", this.setTableMaxHeight);
+  },
+  beforeDestroy() {
+    window.removeEventListener("resize", this.setTableMaxHeight);
+    // 清理防抖定时器
+    if (this.searchTimer) {
+      clearTimeout(this.searchTimer);
     }
-}
+  },
+  computed: {
+    // 计算单据状态
+    documentStatus() {
+      return this.originalData.orderStatus === 3 ? "已关闭" : "检验中";
+    },
+
+    // 计算检验结果
+    inspectionResult() {
+      return this.problemList.every((item) => item.isClose === 1)
+        ? "合格"
+        : "不合格";
+    },
+
+    // 过滤后的检验项列表
+    filteredInspectionList() {
+      if (this.showIsConfirm === "0") {
+        // 显示未关闭的项目（排除 testAttribute 为 'OK' 的项目）
+        return this.inspectionList.filter(
+          (inspection) =>
+            inspection.isClose !== 1 && inspection.testAttribute !== "OK"
+        );
+      } else {
+        // 显示已关闭的项目
+        return this.inspectionList.filter(
+          (inspection) =>
+            inspection.isClose === 1 || inspection.testAttribute === "OK"
+        );
+      }
+    },
+
+    // 过滤后的问题列表
+    filteredProblemList() {
+      if (this.showIsConfirm === "0") {
+        // 显示未关闭的问题
+        return this.problemList.filter((problem) => problem.isClose !== 1);
+      } else {
+        // 显示已关闭的问题
+        return this.problemList.filter((problem) => problem.isClose === 1);
+      }
+    },
+
+    // 图片预览样式计算属性
+    previewImageStyle() {
+      return {
+        transform: `scale(${this.previewScale}) translate(${this.previewTranslateX}px, ${this.previewTranslateY}px)`,
+        transition: this.isTransitioning ? "transform 0.2s ease" : "none",
+      };
+    },
+  },
+  methods: {
+    handleCloseDialog(type) {
+      let saveData = {};
+      if (type === "ConfirmInspection") {
+        this.dialogTestVisible = false;
+        console.log(this.dialogTestData, "HandleInspection");
+        let aa = {
+          ...this.dialogTestData,
+        };
+        const dispositionId = aa.dispositionId;
+        const isClose = aa.isClose;
+        const confirmReMark = aa.confirmReMark;
+        console.log(
+          dispositionId,
+          "dispositionId",
+          isClose,
+          "isClose",
+          confirmReMark,
+          "confirmReMark"
+        );
+        saveData = {
+          flag: type,
+          id: dispositionId,
+          isConfirm: isClose,
+          confirmReMark: confirmReMark,
+        };
+        // 保存数据
+        window.InspectionOnlineSingleSave(saveData, (res) => {
+          this.inspectionList.find(
+            (item) => item.dispositionId === saveData.id
+          ).confirmBy = res.confirmBy;
+        });
+      } else if (type === "ConfirmQuestion") {
+        this.dialogProblemVisible = false;
+        console.log(this.dialogProblemData);
+        let aa = {
+          ...this.dialogProblemData,
+        };
+        const questionId = aa.questionId;
+        const isClose = aa.isClose;
+        const confirmReMark = aa.confirmReMark;
+        const confirmImgs = aa.confirmImgs;
+        console.log(
+          questionId,
+          "questionId",
+          isClose,
+          "isClose",
+          confirmReMark,
+          "confirmReMark",
+          confirmImgs,
+          "confirmImgs"
+        );
+        saveData = {
+          flag: type,
+          id: questionId,
+          isConfirm: isClose,
+          confirmReMark: confirmReMark,
+          confirmImg: confirmImgs,
+        };
+        // 保存数据
+        window.InspectionOnlineSingleSave(saveData, (res) => {
+          this.problemList.find(
+            (item) => item.questionId === saveData.id
+          ).confirmBy = res.confirmBy;
+        });
+      }
+      console.log(saveData, "saveData");
+    },
+    handleOpenDialog(item, index, type) {
+      if (this.pushFlag) {
+        this.pushFlag = false;
+        return;
+      }
+      this.dialogIndex = index;
+      if (type === "inspection") {
+        this.dialogTestData = item;
+        // 避免图片预览被覆盖
+        this.dialogTestVisible = this.dialogVisible !== true;
+        console.log(this.dialogTestData);
+      } else if (type === "problem") {
+        this.dialogProblemData = item;
+        // 避免图片预览被覆盖
+        this.dialogProblemVisible = this.dialogVisible !== true;
+        console.log(this.dialogProblemData);
+      }
+    },
+    // 推送飞书
+    pushFeiShu(data, type) {
+      this.pushFlag = true;
+      this.$msgbox({
+        title: "推送飞书",
+        message: "是否推送飞书？再次推送需要退出重进",
+        showCancelButton: true,
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+        customClass: "my-message-box",
+      })
+        .then(() => {
+          let pushData = {
+            ...this.originalData,
+          };
+          if (type === "inspection") {
+            pushData = {
+              ...pushData,
+              dispositionItem: this.originalData.dispositionItem.filter(
+                (item) =>
+                  item.dispositionId === data.dispositionId &&
+                  item.testAttribute !== "OK" &&
+                  item.dxDesc !== "" &&
+                  item.dispositionDesc !== ""
+              ),
+              questionItem: [],
+            };
+            data.pushStatus = 1;
+          } else if (type === "problem") {
+            pushData = {
+              ...pushData,
+              questionItem: this.originalData.questionItem.filter(
+                (item) =>
+                  item.questionId === data.questionId && item.question !== ""
+              ),
+              dispositionItem: [],
+            };
+            data.pushStatus = 1;
+          }
+          console.log(pushData, "推送飞书");
+          window.pushFeiShu(pushData, (res) => {
+            if (res.code === "0") {
+              this.$message({
+                message: "推送飞书成功",
+                type: "success",
+                duration: 500,
+                showClose: true,
+              });
+            } else {
+              this.$message({
+                message: "推送飞书失败",
+                type: "error",
+                duration: 500,
+                showClose: true,
+              });
+            }
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消推送",
+          });
+        });
+    },
+    customDisable(item) {
+      return (
+        this.originalData.orderStatus === 3 ||
+        item.isHandle !== 1 ||
+        (item.confirmBy !== window.Operator && item.confirmBy !== "")
+      );
+    },
+    // 扫码
+    onCamera(type) {
+      window.parent.OpenCamera &&
+        window.parent.OpenCamera((res) => {
+          if (res.code == 200) {
+            this.currentOrder = "";
+            this.monthlySequence = "";
+            this.frameNumber = "";
+            if (type === "wipOrderNo") {
+              this.currentOrder = res.data;
+              this.handleOrderSearch();
+            } else if (type === "vin") {
+              this.frameNumber = res.data;
+              this.handleFrameNumberSearch();
+            } else if (type === "monthSequence") {
+              this.monthlySequence = res.data;
+              this.handleMonthlySequenceSearch();
+            } else {
+              console.log("未定义的扫码类型");
+            }
+          }
+        });
+    },
+    isAppEnvironment() {
+      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+      return (
+        /iPad|iPhone|iPod/.test(userAgent) || // iOS devices
+        /Android/.test(userAgent)
+      );
+    },
+    // 查询检验项和问题
+    getData(value) {
+      window.dataItem(value, (data) => {
+        console.log(data, "获取检验项和问题");
+        if (data.code === "0") {
+          // 保存原始数据
+          this.originalData = { ...data };
+          // 剔除code和msg
+          delete this.originalData.code;
+          delete this.originalData.msg;
+
+          // 更新界面数据
+          this.updateUIWithData(data);
+          this.$message({
+            message: "查询成功",
+            type: "success",
+            duration: 500,
+            showClose: true,
+          });
+        } else {
+          this.$message({
+            message: data.msg || "查询失败",
+            type: "error",
+            duration: 500,
+            showClose: true,
+          });
+        }
+      });
+    },
+    // 使用查询返回的数据更新界面
+    updateUIWithData(data) {
+      // 更新输入框数据
+      this.currentOrder = data.wipOrderNo || "";
+      this.monthlySequence = data.monthSequence || "";
+      this.frameNumber = data.vin || "";
+      this.modelCode = data.productNo || "";
+
+      // 更新检验项目表格数据
+      this.inspectionList = (data.dispositionItem || []).map((item, index) => {
+        let testAttribute = item.testAttribute === "OK" ? "OK" : "NG";
+
+        // 解析文件
+        const fileNames = item.fileNames ? item.fileNames.split(",") : [];
+        const filePaths = item.filePaths ? item.filePaths.split(",") : [];
+        const fileList = fileNames
+          .map((name, idx) => ({
+            name: name.trim(),
+            path: filePaths[idx] ? filePaths[idx].trim() : "",
+          }))
+          .filter((f) => f.name && f.path);
+
+        return {
+          ...item,
+          index: index + 1,
+          inspectionItem: item.dispositionDesc,
+          testAttribute: testAttribute,
+          pushStatus: 0,
+          fileList: fileList,
+        };
+      });
+
+      // 更新问题描述数据
+      this.problemList = (data.questionItem || []).map((item) => {
+        // 处理检验图片URL，将字符串分割为数组
+        const imageUrls = item.imgs
+          ? item.imgs.split(",").filter((url) => url.trim() !== "")
+          : [];
+        const imageList = imageUrls.map((url) => ({
+          name: url.split("/").pop(),
+          url: url,
+        }));
+
+        // 处理复检图片URL
+        const handImageUrls = item.handImgs
+          ? item.handImgs.split(",").filter((url) => url.trim() !== "")
+          : [];
+        const handImageList = handImageUrls.map((url) => ({
+          name: url.split("/").pop(),
+          url: url,
+        }));
+
+        // 处理确认图片URL
+        const confirmImageUrls = item.confirmImgs
+          ? item.confirmImgs.split(",").filter((url) => url.trim() !== "")
+          : [];
+        const confirmImageList = confirmImageUrls.map((url) => ({
+          name: url.split("/").pop(),
+          url: url,
+        }));
+
+        return {
+          ...item,
+          imageList: imageList,
+          handImageList: handImageList,
+          confirmImageList: confirmImageList,
+          // 确保isHandle是数字类型
+          isHandle: item.isHandle ? Number(item.isHandle) : 0,
+          // 确保isClose是数字类型
+          isClose: item.isClose ? Number(item.isClose) : 0,
+          pushStatus: 0,
+        };
+      });
+    },
+    toggleCollapse() {
+      this.isCollapsed = !this.isCollapsed;
+    },
+    // 构建查询参数
+    buildQueryParams(type) {
+      return {
+        wipOrderNo: type === "wipOrderNo" ? this.currentOrder : "",
+        vin: type === "vin" ? this.frameNumber : "",
+        monthSequence: type === "monthSequence" ? this.monthlySequence : "",
+        workStation: "",
+      };
+    },
+    // 处理订单搜索
+    // 处理订单搜索
+    handleOrderSearch() {
+      // 清除之前的定时器
+      if (this.searchTimer) {
+        clearTimeout(this.searchTimer);
+      }
+
+      // 设置新的定时器（500ms后执行）
+      this.searchTimer = setTimeout(() => {
+        const params = this.buildQueryParams("wipOrderNo");
+        this.getData(params);
+      }, 500);
+    },
+    // 处理月顺序号搜索
+    handleMonthlySequenceSearch() {
+      // 清除之前的定时器
+      if (this.searchTimer) {
+        clearTimeout(this.searchTimer);
+      }
+
+      // 设置新的定时器（500ms后执行）
+      this.searchTimer = setTimeout(() => {
+        const params = this.buildQueryParams("monthSequence");
+        this.getData(params);
+      }, 500);
+    },
+    // 处理车架号搜索
+    handleFrameNumberSearch() {
+      // 清除之前的定时器
+      if (this.searchTimer) {
+        clearTimeout(this.searchTimer);
+      }
+
+      // 设置新的定时器（500ms后执行）
+      this.searchTimer = setTimeout(() => {
+        const params = this.buildQueryParams("vin");
+        this.getData(params);
+      }, 500);
+    },
+    // 处理检验项是否关闭变化
+    handleInspectionIsCloseChange(inspection) {
+      // 更新原始数据
+      const originalInspection = this.originalData.dispositionItem.find(
+        (p) => p.dispositionId === inspection.dispositionId
+      );
+      if (originalInspection) {
+        originalInspection.isClose = inspection.isClose;
+      }
+    },
+    // 处理问题是否关闭变化
+    handleIsCloseChange(problem) {
+      // 更新原始数据
+      const originalProblem = this.originalData.questionItem.find(
+        (p) => p.questionId === problem.questionId
+      );
+      if (originalProblem) {
+        originalProblem.isClose = problem.isClose;
+      }
+    },
+    // 设置表格最大高度
+    setTableMaxHeight() {
+      this.tableMaxHeight = window.innerHeight / 3;
+    },
+    // 图片转Base64
+    fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+      });
+    },
+    // 上传单张确认图片
+    async uploadSingleConfirmImage(base64Data, questionId) {
+      return new Promise((resolve, reject) => {
+        const params = {
+          url: [base64Data],
+          id: questionId,
+          FilePicker: base64Data,
+        };
+
+        window.saveImgFils(params, (response) => {
+          if (response.code === 0) {
+            resolve(response.data);
+          } else {
+            reject(new Error(response.msg || "图片上传失败"));
+          }
+        });
+      });
+    },
+    // 移除单张确认图片
+    removeSingleConfirmImage(problem, imgIndex) {
+      // 从确认图片列表中移除
+      problem.confirmImageList.splice(imgIndex, 1);
+      // 更新confirmImgs字段
+      problem.confirmImgs = problem.confirmImageList
+        .map((f) => f.url)
+        .join(",");
+      // 同步到原始数据
+      this.syncProblemData();
+
+      this.$message({
+        type: "success",
+        message: "删除成功!",
+      });
+    },
+    handlePictureCardPreview(file) {
+      this.dialogImageUrl = file.url;
+      this.dialogVisible = true;
+    },
+    handleConfirmPictureCardPreview(file) {
+      this.dialogImageUrl = file.url;
+      this.dialogVisible = true;
+    },
+    // 删除空问题
+    deleteProblem() {
+      const emptyProblem = this.problemList.filter(
+        (problem) => problem.question.trim() === ""
+      );
+      if (emptyProblem.length > 0) {
+        // 循环删除，调用window方法删除远程，过滤本地空问题
+        for (let i = 0; i < emptyProblem.length; i++) {
+          const problem = emptyProblem[i];
+          // 调用后台删除接口
+          window.questionDel(
+            { flag: "DelQuestion", questionId: problem.questionId },
+            (res) => {
+              console.log("删除空问题:", res);
+            }
+          );
+        }
+        // 从本地列表中过滤掉空问题
+        this.problemList = this.problemList.filter(
+          (problem) => problem.question.trim() !== ""
+        );
+        // 同步到原始数据
+        this.syncProblemData();
+      }
+    },
+    // 保存
+    async save() {
+      this.deleteProblem();
+      try {
+        // 数据同步
+        this.syncProblemData();
+        this.syncInspectionData();
+        const saveData = {
+          ...this.originalData,
+          flag: "Confirm",
+        };
+        console.log("保存数据:", saveData);
+        // 调用保存接口
+        window.InspectionOnlineSaveAndSubmit(saveData, (response) => {
+          if (response.code === "0") {
+            this.$message({
+              message: "保存成功",
+              type: "success",
+              duration: 500,
+              showClose: true,
+            });
+          } else {
+            this.$message({
+              message: response.msg || "保存失败",
+              type: "error",
+              duration: 500,
+              showClose: true,
+            });
+          }
+        });
+      } catch (error) {
+        console.error("保存失败:", error);
+        this.$message({
+          message: "保存失败: " + error.message,
+          type: "error",
+        });
+      }
+    },
+    // 获取未关闭的检验项序号
+    getUnclosedInspectionIndexes() {
+      const unclosedIndexes = [];
+      for (let i = 0; i < this.inspectionList.length; i++) {
+        const inspection = this.inspectionList[i];
+        // 如果项目未关闭且不是OK项，则将其序号加入数组
+        if (inspection.isClose !== 1 && inspection.testAttribute !== "OK") {
+          unclosedIndexes.push(i + 1); // 序号从1开始
+        }
+      }
+      return unclosedIndexes;
+    },
+    // 获取未关闭的问题项序号
+    getUnclosedProblemIndexes() {
+      const unclosedIndexes = [];
+      for (let i = 0; i < this.problemList.length; i++) {
+        const problem = this.problemList[i];
+        // 如果项目未关闭，则将其序号加入数组
+        if (problem.isClose !== 1) {
+          unclosedIndexes.push(i + 1); // 序号从1开始
+        }
+      }
+      return unclosedIndexes;
+    },
+    // 提交
+    async submit() {
+      this.deleteProblem();
+      const unclosedInspectionIndexes = this.getUnclosedInspectionIndexes();
+      const unclosedProblemIndexes = this.getUnclosedProblemIndexes();
+
+      if (
+        unclosedInspectionIndexes.length > 0 ||
+        unclosedProblemIndexes.length > 0
+      ) {
+        let message = "以下项目未关闭：";
+        if (unclosedInspectionIndexes.length > 0) {
+          message += ` 检验项[${unclosedInspectionIndexes.join(",")}];`;
+        }
+        if (unclosedProblemIndexes.length > 0) {
+          message += ` 问题项[${unclosedProblemIndexes.join(",")}];`;
+        }
+        this.$message({
+          message: message,
+          type: "warning",
+          duration: 5000,
+          showClose: true,
+        });
+        return;
+      }
+      this.$confirm("是否确认提交?（将无法再修改！）", "提示", {
+        confirmButtonText: "是",
+        cancelButtonText: "否",
+        showClose: false,
+        closeOnPressEscape: false,
+        closeOnClickModal: false,
+        customClass: "my-message-box", // 添加自定义类名
+      })
+        .then(() => {
+          this.submitData();
+        })
+        .catch(() => {});
+    },
+    // 提交数据
+    submitData() {
+      try {
+        // 确保问题数据同步
+        this.syncProblemData();
+        this.syncInspectionData();
+        const submitData = {
+          ...this.originalData,
+          flag: "ConfirmSubmit",
+        };
+        console.log("提交数据:", submitData);
+        // 调用保存接口
+        window.InspectionOnlineSaveAndSubmit(submitData, (response) => {
+          if (response.code === "0") {
+            this.originalData = {};
+            this.problemList = [];
+            this.inspectionList = [];
+            this.frameNumber = "";
+            this.monthlySequence = "";
+            this.modelCode = "";
+            this.currentOrder = "";
+            this.$message({
+              message: "提交成功",
+              type: "success",
+              duration: 500,
+              showClose: true,
+            });
+          } else {
+            this.$message({
+              message: response.msg || "提交失败",
+              type: "error",
+              duration: 500,
+              showClose: true,
+            });
+          }
+        });
+      } catch (error) {
+        console.error("提交成功:", error);
+        this.$message({
+          message: "提交失败: " + error.message,
+          type: "error",
+        });
+      }
+    },
+    syncInspectionData() {
+      this.originalData.dispositionItem = this.inspectionList.map(
+        (inspection) => {
+          // 查找原始数据中是否已存在该问题
+          const originalInspection =
+            this.originalData.dispositionItem?.find(
+              (p) => p.dispositionId === inspection.dispositionId
+            ) || {};
+          return {
+            ...originalInspection,
+            dispositionId: inspection.dispositionId,
+            dispositionDesc: inspection.dispositionDesc,
+            dxDesc: inspection.dxDesc,
+            testAttribute: inspection.testAttribute,
+            handImgs: inspection.handImgs,
+            handImageList: inspection.handImageList,
+            confirmImgs: inspection.confirmImgs,
+            confirmImageList: inspection.confirmImageList,
+            testBy: inspection.testBy,
+            isHandle: inspection.isHandle,
+            handleReMark: inspection.handleReMark,
+            handleBy: inspection.handleBy,
+            isClose: inspection.isClose,
+            confirmReMark: inspection.confirmReMark,
+            confirmBy: inspection.confirmBy,
+          };
+        }
+      );
+    },
+    syncProblemData() {
+      this.originalData.questionItem = this.problemList.map((problem) => {
+        // 查找原始数据中是否已存在该问题
+        const originalProblem =
+          this.originalData.questionItem?.find(
+            (p) => p.questionId === problem.questionId
+          ) || {};
+        return {
+          ...originalProblem,
+          questionId: problem.questionId,
+          question: problem.question,
+          imgs: problem.imgs,
+          imageList: problem.imageList,
+          handImgs: problem.handImgs,
+          handImageList: problem.handImageList,
+          confirmImgs: problem.confirmImgs,
+          confirmImageList: problem.confirmImageList,
+          testBy: problem.testBy,
+          isHandle: problem.isHandle,
+          handleReMark: problem.handleReMark,
+          handleBy: problem.handleBy,
+          isClose: problem.isClose,
+          confirmReMark: problem.confirmReMark,
+          confirmBy: problem.confirmBy,
+        };
+      });
+    },
+    // 移动端图片上传处理
+    handleMobileUpload(questionId) {
+      // 创建两个文件输入元素
+      const fileInputCamera = document.createElement("input");
+      fileInputCamera.type = "file";
+      fileInputCamera.accept = "image/*";
+      fileInputCamera.capture = "environment"; // 强制使用相机
+      fileInputCamera.style.position = "fixed";
+      fileInputCamera.style.zIndex = "9999";
+
+      const fileInputGallery = document.createElement("input");
+      fileInputGallery.type = "file";
+      fileInputGallery.accept = "image/*";
+      fileInputGallery.multiple = true;
+      fileInputGallery.style.position = "fixed";
+      fileInputGallery.style.zIndex = "9999";
+      const imgLength =
+        this.problemList
+          .find((problem) => problem.questionId === questionId)
+          ?.confirmImgs?.split(",") || [];
+
+      // 显示选择对话框
+      this.$msgbox({
+        title: "上传图片",
+        message: "请选择图片来源",
+        showCancelButton: true,
+        showClose: false,
+        closeOnPressEscape: false,
+        closeOnClickModal: false,
+        confirmButtonText: "拍照",
+        cancelButtonText: "从相册选择",
+        customClass: "my-message-box",
+      })
+        .then(() => {
+          // 用户选择拍照
+          fileInputCamera.onchange = async (event) => {
+            const files = Array.from(event.target.files);
+            if (files.length + imgLength.length > 30) {
+              this.$message.warning(
+                `最多只能上传30张图片，您已经选择了${imgLength.length}张，这次选择了${files.length}张`
+              );
+              return;
+            }
+            await this.processSelectedFiles(files, questionId);
+          };
+          fileInputCamera.click();
+        })
+        .catch(() => {
+          // 用户选择从相册选择
+          fileInputGallery.onchange = async (event) => {
+            const files = Array.from(event.target.files);
+            if (files.length + imgLength.length > 30) {
+              this.$message.warning(
+                `最多只能上传30张图片，您已经选择了${imgLength.length}张，这次选择了${files.length}张`
+              );
+              return;
+            }
+            await this.processSelectedFiles(files, questionId);
+          };
+          fileInputGallery.click();
+        });
+    },
+    // 处理选中的文件
+    async processSelectedFiles(files, questionId) {
+      const problem = this.problemList.find((p) => p.questionId === questionId);
+      if (!problem) return;
+      this.$message.info("正在上传图片，请稍候...");
+      try {
+        // 处理每个选中的文件
+        for (const file of files) {
+          // 转换为base64
+          const base64Data = await this.fileToBase64(file);
+          // 上传图片
+          const serverUrl = await this.uploadSingleConfirmImage(
+            base64Data,
+            questionId
+          );
+          // 创建图片对象并添加到列表
+          const newImage = {
+            name: file.name,
+            url: serverUrl,
+            raw: file,
+          };
+          problem.confirmImageList.push(newImage);
+        }
+        problem.confirmImgs = problem.confirmImageList
+          .map((f) => f.url)
+          .join(",");
+        // 同步到原始数据
+        this.syncProblemData();
+        this.$message.success("图片上传成功");
+      } catch (error) {
+        console.error("图片上传失败:", error);
+        this.$message.error("图片上传失败: " + error.message);
+      }
+    },
+    // 图片预览缩放相关方法
+    zoomIn() {
+      this.previewScale *= 1.2;
+    },
+    zoomOut() {
+      this.previewScale /= 1.2;
+      if (this.previewScale < 0.1) {
+        this.previewScale = 0.1;
+      }
+    },
+    handleWheel(event) {
+      if (event.deltaY < 0) {
+        this.zoomIn();
+      } else {
+        this.zoomOut();
+      }
+    },
+    resetPreviewTransform() {
+      this.previewScale = 1;
+      this.previewTranslateX = 0;
+      this.previewTranslateY = 0;
+    },
+    fitPreviewImage() {
+      this.resetPreviewTransform();
+      this.$nextTick(() => {
+        const image = this.$refs.previewImage;
+        if (image && image.offsetWidth > 0 && image.offsetHeight > 0) {
+          const scaleX = window.innerWidth / image.offsetWidth;
+          const scaleY = window.innerHeight / image.offsetHeight;
+          this.previewScale = Math.min(scaleX, scaleY);
+        }
+      });
+    },
+    onImageLoad() {
+      this.fitPreviewImage();
+    },
+    // 触摸事件处理
+    handleTouchStart(event) {
+      if (event.touches.length === 2) {
+        // 双指触摸，准备缩放
+        this.startTouchDistance = this.getTouchDistance(event.touches);
+        this.startTouchScale = this.previewScale;
+      }
+    },
+    handleTouchMove(event) {
+      if (event.touches.length === 2) {
+        // 双指移动，执行缩放
+        event.preventDefault();
+        const currentDistance = this.getTouchDistance(event.touches);
+        this.previewScale =
+          this.startTouchScale * (currentDistance / this.startTouchDistance);
+
+        // 限制缩放范围
+        if (this.previewScale < 0.1) {
+          this.previewScale = 0.1;
+        } else if (this.previewScale > 10) {
+          this.previewScale = 10;
+        }
+      }
+    },
+    handleTouchEnd() {
+      // 重置触摸距离
+      this.startTouchDistance = 0;
+    },
+    // 计算双指间距离
+    getTouchDistance(touches) {
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    },
+    // 根据文件类型返回不同图标
+    getFileIcon(fileName) {
+      const ext = fileName.split(".").pop().toLowerCase();
+      const iconMap = {
+        pdf: "el-icon-document",
+        doc: "el-icon-document",
+        docx: "el-icon-document",
+        xls: "el-icon-s-grid",
+        xlsx: "el-icon-s-grid",
+        jpg: "el-icon-picture",
+        jpeg: "el-icon-picture",
+        png: "el-icon-picture",
+        gif: "el-icon-picture",
+      };
+      return iconMap[ext] || "el-icon-document";
+    },
+    // 判断是否为PDF文件
+    isPdfFile(fileName) {
+      const ext = fileName.split(".").pop().toLowerCase();
+      return ext === "pdf";
+    },
+    // 判断是否为图片文件
+    isImageFile(fileName) {
+      const ext = fileName.split(".").pop().toLowerCase();
+      return ["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(ext);
+    },
+    // 文件预览/下载
+    handleFilePreview(file) {
+      if (!file.path) {
+        this.$message.warning("文件路径不存在");
+        return;
+      }
+      window.open(file.path, "_blank");
+    },
+  },
+};
 </script>
 
-<style scoped lang='scss'>
+<style scoped lang="scss">
 .dl-conclusion {
   font-weight: bold;
   padding: 5px;
@@ -2243,7 +2611,6 @@ export default {
   align-items: center;
 }
 
-
 /* 表格样式调整 */
 ::v-deep .inspection-table .el-table__header-wrapper th {
   background-color: #f5f7fa;
@@ -2311,7 +2678,7 @@ export default {
 ::v-deep .el-radio-group {
   display: flex;
   white-space: nowrap;
-  padding-top: 8px
+  padding-top: 8px;
 }
 
 ::v-deep .el-radio {
@@ -2336,5 +2703,41 @@ export default {
 .dialog-footer {
   text-align: right;
   padding-top: 20px;
+}
+
+/* 文件列表样式 */
+.file-list {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  .file-item {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    background: #f5f7fa;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+
+    i {
+      margin-right: 6px;
+      color: #409eff;
+    }
+
+    .file-name {
+      font-size: 14px;
+      color: #606266;
+    }
+
+    &:hover {
+      background: #e6f7ff;
+
+      .file-name {
+        color: #409eff;
+      }
+    }
+  }
 }
 </style>
