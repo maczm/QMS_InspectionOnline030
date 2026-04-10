@@ -4,6 +4,15 @@ window.config = {
 };
 // 获取当前登录人window.Operator
 window.Operator = "gw_wangzm26";
+// 获取责任班组选项
+window.getRespTeam = function (callback) {
+  let obj = [
+    { value: "team001", label: "装配一班", employee: "张三" },
+    { value: "team002", label: "装配二班", employee: "李四" },
+    { value: "team003", label: "焊接班", employee: "王五" },
+  ];
+  callback(obj);
+};
 // 获取工位列表
 window.getSelectionList = function (callback) {
   // 入参 data
@@ -332,6 +341,8 @@ window.dataItem = function (Level, callback) {
         question: "",
         imgs: "https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg,https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg",
         testBy: "gw_wangzm26",
+        respTeam: "team001",
+        respEmployee: "张三",
         isHandle: 1,
         handleReMark: "1",
         handImgs:
@@ -347,6 +358,8 @@ window.dataItem = function (Level, callback) {
         question: "202",
         imgs: "https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg",
         testBy: "gw_wangzm26",
+        respTeam: "team003",
+        respEmployee: "王五",
         isHandle: 1,
         handleReMark: "1",
         handImgs:
