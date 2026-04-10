@@ -147,15 +147,6 @@
                   disabled
                 >
                 </el-input>
-                <el-button
-                  type="primary"
-                  size="small"
-                  @click="pushFeiShu(inspection, 'inspection')"
-                  class="push-btn"
-                  :disabled="inspection.pushStatus === 1"
-                >
-                  推送
-                </el-button>
               </div>
               <div class="problem-row">
                 <span class="problem-label">描述：</span>
@@ -321,15 +312,6 @@
                   disabled
                 >
                 </el-input>
-                <el-button
-                  type="primary"
-                  size="small"
-                  @click="pushFeiShu(problem, 'problem')"
-                  class="push-btn"
-                  :disabled="problem.pushStatus === 1"
-                >
-                  推送
-                </el-button>
               </div>
               <!-- 图片展示区域 -->
               <div class="problem-row">
@@ -971,7 +953,6 @@ export default {
       dialogProblemData: {},
       dialogProblemVisible: false,
       dialogIndex: -1,
-      pushFlag: false,
 
       showIsConfirm: "0",
       // 责任班组选项
@@ -1050,152 +1031,50 @@ export default {
       let saveData = {};
       if (type === "ConfirmInspection") {
         this.dialogTestVisible = false;
-        console.log(this.dialogTestData, "HandleInspection");
-        let aa = {
-          ...this.dialogTestData,
-        };
-        const dispositionId = aa.dispositionId;
-        const isClose = aa.isClose;
-        const confirmReMark = aa.confirmReMark;
-        console.log(
-          dispositionId,
-          "dispositionId",
-          isClose,
-          "isClose",
-          confirmReMark,
-          "confirmReMark"
-        );
         saveData = {
           flag: type,
-          id: dispositionId,
-          isConfirm: isClose,
-          confirmReMark: confirmReMark,
+          id: this.dialogTestData.dispositionId,
+          isConfirm: this.dialogTestData.isClose,
+          confirmReMark: this.dialogTestData.confirmReMark,
         };
+        console.log("确认检验项请求：", JSON.parse(JSON.stringify(saveData)));
         // 保存数据
         window.InspectionOnlineSingleSave(saveData, (res) => {
+          console.log("确认检验项响应：", JSON.parse(JSON.stringify(res)));
           this.inspectionList.find(
             (item) => item.dispositionId === saveData.id
           ).confirmBy = res.confirmBy;
         });
       } else if (type === "ConfirmQuestion") {
         this.dialogProblemVisible = false;
-        console.log(this.dialogProblemData);
-        let aa = {
-          ...this.dialogProblemData,
-        };
-        const questionId = aa.questionId;
-        const isClose = aa.isClose;
-        const confirmReMark = aa.confirmReMark;
-        const confirmImgs = aa.confirmImgs;
-        console.log(
-          questionId,
-          "questionId",
-          isClose,
-          "isClose",
-          confirmReMark,
-          "confirmReMark",
-          confirmImgs,
-          "confirmImgs"
-        );
         saveData = {
           flag: type,
-          id: questionId,
-          isConfirm: isClose,
-          confirmReMark: confirmReMark,
-          confirmImg: confirmImgs,
+          id: this.dialogProblemData.questionId,
+          isConfirm: this.dialogProblemData.isClose,
+          confirmReMark: this.dialogProblemData.confirmReMark,
+          confirmImg: this.dialogProblemData.confirmImgs,
         };
+        console.log("确认问题项请求：", JSON.parse(JSON.stringify(saveData)));
         // 保存数据
         window.InspectionOnlineSingleSave(saveData, (res) => {
+          console.log("确认问题项响应：", JSON.parse(JSON.stringify(res)));
           this.problemList.find(
             (item) => item.questionId === saveData.id
           ).confirmBy = res.confirmBy;
         });
       }
-      console.log(saveData, "saveData");
     },
     handleOpenDialog(item, index, type) {
-      if (this.pushFlag) {
-        this.pushFlag = false;
-        return;
-      }
       this.dialogIndex = index;
       if (type === "inspection") {
         this.dialogTestData = item;
         // 避免图片预览被覆盖
         this.dialogTestVisible = this.dialogVisible !== true;
-        console.log(this.dialogTestData);
       } else if (type === "problem") {
         this.dialogProblemData = item;
         // 避免图片预览被覆盖
         this.dialogProblemVisible = this.dialogVisible !== true;
-        console.log(this.dialogProblemData);
       }
-    },
-    // 推送飞书
-    pushFeiShu(data, type) {
-      this.pushFlag = true;
-      this.$msgbox({
-        title: "推送飞书",
-        message: "是否推送飞书？再次推送需要退出重进",
-        showCancelButton: true,
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-        customClass: "my-message-box",
-      })
-        .then(() => {
-          let pushData = {
-            ...this.originalData,
-          };
-          if (type === "inspection") {
-            pushData = {
-              ...pushData,
-              dispositionItem: this.originalData.dispositionItem.filter(
-                (item) =>
-                  item.dispositionId === data.dispositionId &&
-                  item.testAttribute !== "OK" &&
-                  item.dxDesc !== "" &&
-                  item.dispositionDesc !== ""
-              ),
-              questionItem: [],
-            };
-            data.pushStatus = 1;
-          } else if (type === "problem") {
-            pushData = {
-              ...pushData,
-              questionItem: this.originalData.questionItem.filter(
-                (item) =>
-                  item.questionId === data.questionId && item.question !== ""
-              ),
-              dispositionItem: [],
-            };
-            data.pushStatus = 1;
-          }
-          console.log(pushData, "推送飞书");
-          window.pushFeiShu(pushData, (res) => {
-            if (res.code === "0") {
-              this.$message({
-                message: "推送飞书成功",
-                type: "success",
-                duration: 500,
-                showClose: true,
-              });
-            } else {
-              this.$message({
-                message: "推送飞书失败",
-                type: "error",
-                duration: 500,
-                showClose: true,
-              });
-            }
-          });
-        })
-        .catch(() => {
-          this.$message({
-            type: "info",
-            message: "已取消推送",
-          });
-        });
     },
     customDisable(item) {
       return (
@@ -1222,7 +1101,7 @@ export default {
               this.monthlySequence = res.data;
               this.handleMonthlySequenceSearch();
             } else {
-              console.log("未定义的扫码类型");
+              console.log("未定义的扫码类型：", type);
             }
           }
         });
@@ -1236,8 +1115,9 @@ export default {
     },
     // 查询检验项和问题
     getData(value) {
+      console.log("查询检验项和问题请求：", JSON.parse(JSON.stringify(value)));
       window.dataItem(value, (data) => {
-        console.log(data, "获取检验项和问题");
+        console.log("查询检验项和问题响应：", JSON.parse(JSON.stringify(data)));
         if (data.code === "0") {
           // 保存原始数据
           this.originalData = { ...data };
@@ -1466,26 +1346,65 @@ export default {
       this.dialogImageUrl = file.url;
       this.dialogVisible = true;
     },
+    // 删除空检验项
+    deleteInspection() {
+      const emptyInspection = this.inspectionList.filter(
+        (inspection) =>
+          !inspection.dispositionDesc ||
+          inspection.dispositionDesc.trim() === ""
+      );
+      if (emptyInspection.length > 0) {
+        // 循环删除，调用window方法删除远程，过滤本地空检验项
+        for (let i = 0; i < emptyInspection.length; i++) {
+          const inspection = emptyInspection[i];
+          const delParams = {
+            flag: "DelInspection",
+            dispositionId: inspection.dispositionId,
+          };
+          console.log(
+            "删除空检验项请求：",
+            JSON.parse(JSON.stringify(delParams))
+          );
+          // 调用后台删除接口
+          window.inspectionDel(delParams, (res) => {
+            console.log("删除空检验项响应：", JSON.parse(JSON.stringify(res)));
+          });
+        }
+        // 从本地列表中过滤掉空检验项
+        this.inspectionList = this.inspectionList.filter(
+          (inspection) =>
+            inspection.dispositionDesc &&
+            inspection.dispositionDesc.trim() !== ""
+        );
+        // 同步到原始数据
+        this.syncInspectionData();
+      }
+    },
     // 删除空问题
     deleteProblem() {
       const emptyProblem = this.problemList.filter(
-        (problem) => problem.question.trim() === ""
+        (problem) => !problem.question || problem.question.trim() === ""
       );
       if (emptyProblem.length > 0) {
         // 循环删除，调用window方法删除远程，过滤本地空问题
         for (let i = 0; i < emptyProblem.length; i++) {
           const problem = emptyProblem[i];
-          // 调用后台删除接口
-          window.questionDel(
-            { flag: "DelQuestion", questionId: problem.questionId },
-            (res) => {
-              console.log("删除空问题:", res);
-            }
+          const delParams = {
+            flag: "DelQuestion",
+            questionId: problem.questionId,
+          };
+          console.log(
+            "删除空问题请求：",
+            JSON.parse(JSON.stringify(delParams))
           );
+          // 调用后台删除接口
+          window.questionDel(delParams, (res) => {
+            console.log("删除空问题响应：", JSON.parse(JSON.stringify(res)));
+          });
         }
         // 从本地列表中过滤掉空问题
         this.problemList = this.problemList.filter(
-          (problem) => problem.question.trim() !== ""
+          (problem) => problem.question && problem.question.trim() !== ""
         );
         // 同步到原始数据
         this.syncProblemData();
@@ -1493,6 +1412,7 @@ export default {
     },
     // 保存
     async save() {
+      this.deleteInspection();
       this.deleteProblem();
       try {
         // 数据同步
@@ -1502,9 +1422,10 @@ export default {
           ...this.originalData,
           flag: "Confirm",
         };
-        console.log("保存数据:", saveData);
+        console.log("保存数据请求：", JSON.parse(JSON.stringify(saveData)));
         // 调用保存接口
         window.InspectionOnlineSaveAndSubmit(saveData, (response) => {
+          console.log("保存数据响应：", JSON.parse(JSON.stringify(response)));
           if (response.code === "0") {
             this.$message({
               message: "保存成功",
@@ -1522,7 +1443,7 @@ export default {
           }
         });
       } catch (error) {
-        console.error("保存失败:", error);
+        console.log("保存失败：", JSON.parse(JSON.stringify(error)));
         this.$message({
           message: "保存失败: " + error.message,
           type: "error",
@@ -1555,6 +1476,7 @@ export default {
     },
     // 提交
     async submit() {
+      this.deleteInspection();
       this.deleteProblem();
       const unclosedInspectionIndexes = this.getUnclosedInspectionIndexes();
       const unclosedProblemIndexes = this.getUnclosedProblemIndexes();
@@ -1601,9 +1523,10 @@ export default {
           ...this.originalData,
           flag: "ConfirmSubmit",
         };
-        console.log("提交数据:", submitData);
+        console.log("提交数据请求：", JSON.parse(JSON.stringify(submitData)));
         // 调用保存接口
         window.InspectionOnlineSaveAndSubmit(submitData, (response) => {
+          console.log("提交数据响应：", JSON.parse(JSON.stringify(response)));
           if (response.code === "0") {
             this.originalData = {};
             this.problemList = [];
@@ -1628,7 +1551,7 @@ export default {
           }
         });
       } catch (error) {
-        console.error("提交成功:", error);
+        console.log("提交失败：", JSON.parse(JSON.stringify(error)));
         this.$message({
           message: "提交失败: " + error.message,
           type: "error",
@@ -1783,7 +1706,7 @@ export default {
         this.syncProblemData();
         this.$message.success("图片上传成功");
       } catch (error) {
-        console.error("图片上传失败:", error);
+        console.log("图片上传失败：", JSON.parse(JSON.stringify(error)));
         this.$message.error("图片上传失败: " + error.message);
       }
     },
