@@ -921,7 +921,6 @@ export default {
       modelCode: "",
 
       // 新增数据
-      tableMaxHeight: 300,
       inspectionList: [],
       problemList: [],
 
@@ -1037,10 +1036,9 @@ export default {
           isConfirm: this.dialogTestData.isClose,
           confirmReMark: this.dialogTestData.confirmReMark,
         };
-        console.log("确认检验项请求：", JSON.parse(JSON.stringify(saveData)));
+
         // 保存数据
         window.InspectionOnlineSingleSave(saveData, (res) => {
-          console.log("确认检验项响应：", JSON.parse(JSON.stringify(res)));
           this.inspectionList.find(
             (item) => item.dispositionId === saveData.id
           ).confirmBy = res.confirmBy;
@@ -1054,10 +1052,9 @@ export default {
           confirmReMark: this.dialogProblemData.confirmReMark,
           confirmImg: this.dialogProblemData.confirmImgs,
         };
-        console.log("确认问题项请求：", JSON.parse(JSON.stringify(saveData)));
+
         // 保存数据
         window.InspectionOnlineSingleSave(saveData, (res) => {
-          console.log("确认问题项响应：", JSON.parse(JSON.stringify(res)));
           this.problemList.find(
             (item) => item.questionId === saveData.id
           ).confirmBy = res.confirmBy;
@@ -1101,7 +1098,7 @@ export default {
               this.monthlySequence = res.data;
               this.handleMonthlySequenceSearch();
             } else {
-              console.log("未定义的扫码类型：", type);
+              // 未定义的扫码类型
             }
           }
         });
@@ -1115,9 +1112,7 @@ export default {
     },
     // 查询检验项和问题
     getData(value) {
-      console.log("查询检验项和问题请求：", JSON.parse(JSON.stringify(value)));
       window.dataItem(value, (data) => {
-        console.log("查询检验项和问题响应：", JSON.parse(JSON.stringify(data)));
         if (data.code === "0") {
           // 保存原始数据
           this.originalData = { ...data };
@@ -1404,8 +1399,8 @@ export default {
             JSON.parse(JSON.stringify(delParams))
           );
           // 调用后台删除接口
-          window.inspectionDel(delParams, (res) => {
-            console.log("删除空检验项响应：", JSON.parse(JSON.stringify(res)));
+          window.inspectionDel(delParams, () => {
+            // 删除成功
           });
         }
         // 从本地列表中过滤掉空检验项
@@ -1436,8 +1431,8 @@ export default {
             JSON.parse(JSON.stringify(delParams))
           );
           // 调用后台删除接口
-          window.questionDel(delParams, (res) => {
-            console.log("删除空问题响应：", JSON.parse(JSON.stringify(res)));
+          window.questionDel(delParams, () => {
+            // 删除成功
           });
         }
         // 从本地列表中过滤掉空问题
@@ -1460,10 +1455,9 @@ export default {
           ...this.originalData,
           flag: "Confirm",
         };
-        console.log("保存数据请求：", JSON.parse(JSON.stringify(saveData)));
+
         // 调用保存接口
         window.InspectionOnlineSaveAndSubmit(saveData, (response) => {
-          console.log("保存数据响应：", JSON.parse(JSON.stringify(response)));
           if (response.code === "0") {
             this.$message({
               message: "保存成功",
@@ -1481,7 +1475,6 @@ export default {
           }
         });
       } catch (error) {
-        console.log("保存失败：", JSON.parse(JSON.stringify(error)));
         this.$message({
           message: "保存失败: " + error.message,
           type: "error",
@@ -1561,10 +1554,9 @@ export default {
           ...this.originalData,
           flag: "ConfirmSubmit",
         };
-        console.log("提交数据请求：", JSON.parse(JSON.stringify(submitData)));
+
         // 调用保存接口
         window.InspectionOnlineSaveAndSubmit(submitData, (response) => {
-          console.log("提交数据响应：", JSON.parse(JSON.stringify(response)));
           if (response.code === "0") {
             this.originalData = {};
             this.problemList = [];
@@ -1589,7 +1581,6 @@ export default {
           }
         });
       } catch (error) {
-        console.log("提交失败：", JSON.parse(JSON.stringify(error)));
         this.$message({
           message: "提交失败: " + error.message,
           type: "error",
@@ -1744,7 +1735,6 @@ export default {
         this.syncProblemData();
         this.$message.success("图片上传成功");
       } catch (error) {
-        console.log("图片上传失败：", JSON.parse(JSON.stringify(error)));
         this.$message.error("图片上传失败: " + error.message);
       }
     },
@@ -1835,15 +1825,7 @@ export default {
       return iconMap[ext] || "el-icon-document";
     },
     // 判断是否为PDF文件
-    isPdfFile(fileName) {
-      const ext = fileName.split(".").pop().toLowerCase();
-      return ext === "pdf";
-    },
     // 判断是否为图片文件
-    isImageFile(fileName) {
-      const ext = fileName.split(".").pop().toLowerCase();
-      return ["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(ext);
-    },
     // 文件预览/下载
     handleFilePreview(file) {
       if (!file.path) {
