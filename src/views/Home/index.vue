@@ -345,35 +345,23 @@
                 >
                 </el-input>
               </div>
-              <!-- 责任班组 -->
+              <!-- 责任工作中心 -->
               <div class="problem-row">
-                <span class="problem-label">责任班组：</span>
+                <span class="problem-label">责任工作中心：</span>
                 <el-select
-                  v-model="problem.respTeam"
+                  v-model="problem.respWorkCenter"
                   filterable
                   disabled
                   size="small"
                 >
                   <el-option
-                    v-for="item in respTeamOptions"
+                    v-for="item in respWorkCenterOptions"
                     :key="item.value"
                     :label="item.label"
                     :value="item.value"
                   >
                   </el-option>
                 </el-select>
-              </div>
-              <!-- 责任人 -->
-              <div class="problem-row">
-                <span class="problem-label">责任人：</span>
-                <el-input
-                  v-model="problem.respEmployee"
-                  class="problem-input"
-                  disabled
-                  type="textarea"
-                  autosize
-                >
-                </el-input>
               </div>
               <!-- 是否处置 -->
               <div class="problem-row">
@@ -749,6 +737,24 @@
         >
         </el-input>
       </div>
+      <!-- 责任工作中心 -->
+      <div class="problem-row">
+        <span class="problem-label">责任工作中心：</span>
+        <el-select
+          v-model="dialogProblemData.respWorkCenter"
+          filterable
+          disabled
+          size="small"
+        >
+          <el-option
+            v-for="item in respWorkCenterOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          >
+          </el-option>
+        </el-select>
+      </div>
       <!-- 是否处置 -->
       <div class="problem-row">
         <span class="problem-label">是否处置：</span>
@@ -954,16 +960,18 @@ export default {
       dialogIndex: -1,
 
       showIsConfirm: "0",
-      // 责任班组选项
-      respTeamOptions: [],
+
+      // 责任工作中心选项
+      respWorkCenterOptions: [],
     };
   },
   mounted() {
+    // 获取责任工作中心选项
+    window.getRespWorkCenter &&
+      window.getRespWorkCenter((res) => {
+        this.respWorkCenterOptions = res;
+      });
     this.isApp = this.isAppEnvironment();
-    // 获取责任班组选项
-    window.getRespTeam((res) => {
-      this.respTeamOptions = res;
-    });
 
     // 设置表格最大高度为屏幕的1/3
     this.setTableMaxHeight();
@@ -1209,8 +1217,7 @@ export default {
           // 确保isClose是数字类型
           isClose: item.isClose ? Number(item.isClose) : 0,
           pushStatus: 0,
-          respTeam: item.respTeam || "",
-          respEmployee: item.respEmployee || "",
+          respWorkCenter: item.respWorkCenter || "",
         };
       });
     },
@@ -1633,6 +1640,7 @@ export default {
           handImageList: problem.handImageList,
           confirmImgs: problem.confirmImgs,
           confirmImageList: problem.confirmImageList,
+          respWorkCenter: problem.respWorkCenter,
           testBy: problem.testBy,
           isHandle: problem.isHandle,
           handleReMark: problem.handleReMark,
