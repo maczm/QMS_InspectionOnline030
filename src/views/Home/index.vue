@@ -962,15 +962,17 @@ export default {
       showIsConfirm: "0",
 
       // 责任工作中心选项
-      respWorkCenterOptions: [],
+      respWorkCenterOptions: [
+        { value: "冲焊工作中心", label: "冲焊工作中心" },
+        { value: "涂装工作中心", label: "涂装工作中心" },
+        { value: "调试工作中心", label: "调试工作中心" },
+        { value: "驾驶室工作中心", label: "驾驶室工作中心" },
+        { value: "底盘分装工作中心", label: "底盘分装工作中心" },
+        { value: "底盘装配工作中心", label: "底盘装配工作中心" },
+      ],
     };
   },
   mounted() {
-    // 获取责任工作中心选项
-    window.getRespWorkCenter &&
-      window.getRespWorkCenter((res) => {
-        this.respWorkCenterOptions = res;
-      });
     this.isApp = this.isAppEnvironment();
 
     // 设置表格最大高度为屏幕的1/3
