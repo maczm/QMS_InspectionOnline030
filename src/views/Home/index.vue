@@ -1655,13 +1655,37 @@ export default {
     },
     // 移动端图片上传处理
     handleMobileUpload(questionId) {
-      // 创建两个文件输入元素
       const fileInputCamera = document.createElement("input");
       fileInputCamera.type = "file";
       fileInputCamera.accept = "image/*";
-      fileInputCamera.capture = "environment"; // 强制使用相机
+      fileInputCamera.capture = "environment";
       fileInputCamera.style.position = "fixed";
       fileInputCamera.style.zIndex = "9999";
+
+      const imgLength =
+        this.problemList
+          .find((problem) => problem.questionId === questionId)
+          ?.confirmImgs?.split(",") || [];
+
+      const triggerCamera = () => {
+        fileInputCamera.onchange = async (event) => {
+          const files = Array.from(event.target.files);
+          if (files.length + imgLength.length > 30) {
+            this.$message.warning(
+              `最多只能上传30张图片，您已经选择了${imgLength.length}张，这次选择了${files.length}张`
+            );
+            return;
+          }
+          await this.processSelectedFiles(files, questionId);
+        };
+        fileInputCamera.click();
+      };
+
+      // Android 直接拍照
+      if (/android/i.test(navigator.userAgent)) {
+        triggerCamera();
+        return;
+      }
 
       const fileInputGallery = document.createElement("input");
       fileInputGallery.type = "file";
@@ -1669,10 +1693,6 @@ export default {
       fileInputGallery.multiple = true;
       fileInputGallery.style.position = "fixed";
       fileInputGallery.style.zIndex = "9999";
-      const imgLength =
-        this.problemList
-          .find((problem) => problem.questionId === questionId)
-          ?.confirmImgs?.split(",") || [];
 
       // 显示选择对话框
       this.$msgbox({
@@ -1687,21 +1707,9 @@ export default {
         customClass: "my-message-box",
       })
         .then(() => {
-          // 用户选择拍照
-          fileInputCamera.onchange = async (event) => {
-            const files = Array.from(event.target.files);
-            if (files.length + imgLength.length > 30) {
-              this.$message.warning(
-                `最多只能上传30张图片，您已经选择了${imgLength.length}张，这次选择了${files.length}张`
-              );
-              return;
-            }
-            await this.processSelectedFiles(files, questionId);
-          };
-          fileInputCamera.click();
+          triggerCamera();
         })
         .catch(() => {
-          // 用户选择从相册选择
           fileInputGallery.onchange = async (event) => {
             const files = Array.from(event.target.files);
             if (files.length + imgLength.length > 30) {
