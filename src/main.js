@@ -3,104 +3,104 @@ import App from "./App.vue";
 import router from "./router";
 import store from "./store";
 // rem自适应
-import './utils/rem.js'
+import "./utils/rem.js";
 // import '@/utils/rem.js'
-import 'lib-flexible'
+import "lib-flexible";
 // 封装公共的防抖与节流函数
-import {debounce, throttle} from '@/PublicMethods/dbucTrtl';
+import { debounce, throttle } from "@/PublicMethods/dbucTrtl";
 
 Vue.prototype.$debounce = debounce;
 Vue.prototype.$throttle = throttle;
 // 初始化css样式
-import "@/style/reset.css"
+import "@/style/reset.css";
 // 二次封装localStorage，sessionStorage和cookie并挂载到this上
-import storage from "@/utils/storage"
+import storage from "@/utils/storage";
 import keyboardFocus from "@/directives/keyboardFocus";
 
-Vue.directive('keyboard-focus', keyboardFocus);
+Vue.directive("keyboard-focus", keyboardFocus);
 
-Vue.use(storage)
+Vue.use(storage);
 // 导入element-ui
 import {
-    Pagination,
-    Dialog,
-    Autocomplete,
-    Dropdown,
-    DropdownMenu,
-    DropdownItem,
-    Menu,
-    Submenu,
-    MenuItem,
-    MenuItemGroup,
-    Input,
-    InputNumber,
-    Radio,
-    RadioGroup,
-    RadioButton,
-    Checkbox,
-    CheckboxButton,
-    CheckboxGroup,
-    Switch,
-    Select,
-    Option,
-    OptionGroup,
-    Button,
-    ButtonGroup,
-    Table,
-    TableColumn,
-    DatePicker,
-    TimeSelect,
-    TimePicker,
-    Popover,
-    Tooltip,
-    Breadcrumb,
-    BreadcrumbItem,
-    Form,
-    FormItem,
-    Tabs,
-    TabPane,
-    Tag,
-    Tree,
-    Alert,
-    Slider,
-    Icon,
-    Row,
-    Col,
-    Upload,
-    Progress,
-    Spinner,
-    Badge,
-    Card,
-    Rate,
-    Steps,
-    Step,
-    Carousel,
-    CarouselItem,
-    Collapse,
-    CollapseItem,
-    Cascader,
-    ColorPicker,
-    Transfer,
-    Container,
-    Header,
-    Aside,
-    Main,
-    Footer,
-    Timeline,
-    TimelineItem,
-    Link,
-    Divider,
-    Image,
-    Calendar,
-    Backtop,
-    PageHeader,
-    CascaderPanel,
-    Loading,
-    MessageBox,
-    Message,
-    Notification
-} from 'element-ui';
-import 'element-ui/lib/theme-chalk/index.css';
+  Pagination,
+  Dialog,
+  Autocomplete,
+  Dropdown,
+  DropdownMenu,
+  DropdownItem,
+  Menu,
+  Submenu,
+  MenuItem,
+  MenuItemGroup,
+  Input,
+  InputNumber,
+  Radio,
+  RadioGroup,
+  RadioButton,
+  Checkbox,
+  CheckboxButton,
+  CheckboxGroup,
+  Switch,
+  Select,
+  Option,
+  OptionGroup,
+  Button,
+  ButtonGroup,
+  Table,
+  TableColumn,
+  DatePicker,
+  TimeSelect,
+  TimePicker,
+  Popover,
+  Tooltip,
+  Breadcrumb,
+  BreadcrumbItem,
+  Form,
+  FormItem,
+  Tabs,
+  TabPane,
+  Tag,
+  Tree,
+  Alert,
+  Slider,
+  Icon,
+  Row,
+  Col,
+  Upload,
+  Progress,
+  Spinner,
+  Badge,
+  Card,
+  Rate,
+  Steps,
+  Step,
+  Carousel,
+  CarouselItem,
+  Collapse,
+  CollapseItem,
+  Cascader,
+  ColorPicker,
+  Transfer,
+  Container,
+  Header,
+  Aside,
+  Main,
+  Footer,
+  Timeline,
+  TimelineItem,
+  Link,
+  Divider,
+  Image,
+  Calendar,
+  Backtop,
+  PageHeader,
+  CascaderPanel,
+  Loading,
+  MessageBox,
+  Message,
+  Notification,
+} from "element-ui";
+import "element-ui/lib/theme-chalk/index.css";
 
 Vue.use(Pagination);
 Vue.use(Dialog);
@@ -186,11 +186,10 @@ Vue.prototype.$prompt = MessageBox.prompt;
 Vue.prototype.$notify = Notification;
 Vue.prototype.$message = Message;
 
-
 Vue.config.productionTip = false;
 
 new Vue({
-    router,
-    store,
-    render: (h) => h(App),
+  router,
+  store,
+  render: (h) => h(App),
 }).$mount("#app");

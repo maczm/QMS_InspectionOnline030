@@ -1,13 +1,15 @@
 const { defineConfig } = require("@vue/cli-service");
 
 // 添加路径配置
-let prodPublicPath = '/Apriso/Portal/VueProject/QMS_InspectionOnline030/'
-let devPublicPath = ''
-let publicPath = ''
-if (process.env.NODE_ENV === 'production') {//生产环境
-  publicPath = prodPublicPath
-} else {//开发环境
-  publicPath = devPublicPath
+let prodPublicPath = "/Apriso/Portal/VueProject/QMS_InspectionOnline030/";
+let devPublicPath = "";
+let publicPath = "";
+if (process.env.NODE_ENV === "production") {
+  //生产环境
+  publicPath = prodPublicPath;
+} else {
+  //开发环境
+  publicPath = devPublicPath;
 }
 
 module.exports = defineConfig({
@@ -23,24 +25,24 @@ module.exports = defineConfig({
   configureWebpack: {
     resolve: {
       fallback: {
-        "url": require.resolve("url/")
-      }
-    }
+        url: require.resolve("url/"),
+      },
+    },
   },
   css: {
     loaderOptions: {
       postcss: {
         postcssOptions: {
           plugins: [
-            require('postcss-pxtorem')({
+            require("postcss-pxtorem")({
               rootValue: 37.5, // 换算的基数
               minPixelValue: 2,
               selectorBlackList: [], // 忽略转换正则匹配项 列入一些ui库, ['.el'] 就是忽略elementUI库
-              propList: ['*'],
+              propList: ["*"],
             }),
-          ]
-        }
-      }
-    }
-  }
+          ],
+        },
+      },
+    },
+  },
 });
