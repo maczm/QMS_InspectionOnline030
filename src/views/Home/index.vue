@@ -1047,13 +1047,52 @@ export default {
           confirmReMark: this.dialogTestData.confirmReMark,
         };
 
-        // 保存数据
-        window.InspectionOnlineSingleSave(saveData, (res) => {
-          this.inspectionList.find(
-            (item) => item.dispositionId === saveData.id
-          ).confirmBy = res.confirmBy;
+        const loading = this.$loading({
+          lock: true,
+          text: '保存中...',
+          background: 'rgba(0, 0, 0, 0.7)',
         });
+        try {
+          if (typeof window.InspectionOnlineSingleSave !== 'function') {
+            loading.close();
+            this.$message({
+              message: '保存功能不可用',
+              type: 'error',
+              duration: 3000,
+              showClose: true,
+            });
+            return;
+          }
+          window.InspectionOnlineSingleSave(saveData, (res) => {
+            loading.close();
+            this.inspectionList.find(
+              (item) => item.dispositionId === saveData.id
+            ).confirmBy = res.confirmBy;
+          });
+        } catch (e) {
+          loading.close();
+          this.$message({
+            message: '保存失败: ' + e.message,
+            type: 'error',
+            duration: 3000,
+            showClose: true,
+          });
+        }
       } else if (type === "ConfirmQuestion") {
+        // 校验确认图片不能为空
+        if (
+          this.dialogProblemData.isClose === 1 &&
+          (!this.dialogProblemData.confirmImageList ||
+            this.dialogProblemData.confirmImageList.length === 0)
+        ) {
+          this.$message({
+            message: '确认图片不能为空',
+            type: 'warning',
+            duration: 3000,
+            showClose: true,
+          });
+          return;
+        }
         this.dialogProblemVisible = false;
         saveData = {
           flag: type,
@@ -1063,12 +1102,52 @@ export default {
           confirmImg: this.dialogProblemData.confirmImgs,
         };
 
-        // 保存数据
-        window.InspectionOnlineSingleSave(saveData, (res) => {
-          this.problemList.find(
-            (item) => item.questionId === saveData.id
-          ).confirmBy = res.confirmBy;
+        const loading = this.$loading({
+          lock: true,
+          text: '保存中...',
+          background: 'rgba(0, 0, 0, 0.7)',
         });
+        try {
+          if (typeof window.InspectionOnlineSingleSave !== 'function') {
+            loading.close();
+            this.$message({
+              message: '保存功能不可用',
+              type: 'error',
+              duration: 3000,
+              showClose: true,
+            });
+            return;
+          }
+          window.InspectionOnlineSingleSave(saveData, (res) => {
+            loading.close();
+            if (res.code == "0") {
+              this.problemList.find(
+                (item) => item.questionId === saveData.id
+              ).confirmBy = res.confirmBy;
+              this.$message({
+                message: '操作成功',
+                type: 'success',
+                duration: 500,
+                showClose: true,
+              });
+            } else {
+              this.$message({
+                message: res.msg || '操作失败',
+                type: 'error',
+                duration: 3000,
+                showClose: true,
+              });
+            }
+          });
+        } catch (e) {
+          loading.close();
+          this.$message({
+            message: '保存失败: ' + e.message,
+            type: 'error',
+            duration: 3000,
+            showClose: true,
+          });
+        }
       }
     },
     handleOpenDialog(item, index, type) {
@@ -1092,26 +1171,34 @@ export default {
     },
     // 扫码
     onCamera(type) {
-      window.parent.OpenCamera &&
-        window.parent.OpenCamera((res) => {
-          if (res.code == 200) {
-            this.currentOrder = "";
-            this.monthlySequence = "";
-            this.frameNumber = "";
-            if (type === "wipOrderNo") {
-              this.currentOrder = res.data;
-              this.handleOrderSearch();
-            } else if (type === "vin") {
-              this.frameNumber = res.data;
-              this.handleFrameNumberSearch();
-            } else if (type === "monthSequence") {
-              this.monthlySequence = res.data;
-              this.handleMonthlySequenceSearch();
-            } else {
-              // 未定义的扫码类型
+      try {
+        if (window.parent && typeof window.parent.OpenCamera === 'function') {
+          window.parent.OpenCamera((res) => {
+            if (res.code == 200) {
+              this.currentOrder = "";
+              this.monthlySequence = "";
+              this.frameNumber = "";
+              if (type === "wipOrderNo") {
+                this.currentOrder = res.data;
+                this.handleOrderSearch();
+              } else if (type === "vin") {
+                this.frameNumber = res.data;
+                this.handleFrameNumberSearch();
+              } else if (type === "monthSequence") {
+                this.monthlySequence = res.data;
+                this.handleMonthlySequenceSearch();
+              }
             }
-          }
+          });
+        }
+      } catch (e) {
+        this.$message({
+          message: '扫码失败: ' + e.message,
+          type: 'error',
+          duration: 3000,
+          showClose: true,
         });
+      }
     },
     isAppEnvironment() {
       const userAgent = navigator.userAgent || navigator.vendor || window.opera;
@@ -1122,31 +1209,57 @@ export default {
     },
     // 查询检验项和问题
     getData(value) {
-      window.dataItem(value, (data) => {
-        if (data.code === "0") {
-          // 保存原始数据
-          this.originalData = { ...data };
-          // 剔除code和msg
-          delete this.originalData.code;
-          delete this.originalData.msg;
-
-          // 更新界面数据
-          this.updateUIWithData(data);
-          this.$message({
-            message: "查询成功",
-            type: "success",
-            duration: 500,
-            showClose: true,
-          });
-        } else {
-          this.$message({
-            message: data.msg || "查询失败",
-            type: "error",
-            duration: 500,
-            showClose: true,
-          });
-        }
+      const loading = this.$loading({
+        lock: true,
+        text: '查询中...',
+        background: 'rgba(0, 0, 0, 0.7)',
       });
+      try {
+        if (typeof window.dataItem !== 'function') {
+          loading.close();
+          this.$message({
+            message: '查询功能不可用',
+            type: 'error',
+            duration: 3000,
+            showClose: true,
+          });
+          return;
+        }
+        window.dataItem(value, (data) => {
+          loading.close();
+          if (data.code === "0") {
+            // 保存原始数据
+            this.originalData = { ...data };
+            // 剔除code和msg
+            delete this.originalData.code;
+            delete this.originalData.msg;
+
+            // 更新界面数据
+            this.updateUIWithData(data);
+            this.$message({
+              message: "查询成功",
+              type: "success",
+              duration: 500,
+              showClose: true,
+            });
+          } else {
+            this.$message({
+              message: data.msg || "查询失败",
+              type: "error",
+              duration: 3000,
+              showClose: true,
+            });
+          }
+        });
+      } catch (e) {
+        loading.close();
+        this.$message({
+          message: '查询失败: ' + e.message,
+          type: 'error',
+          duration: 3000,
+          showClose: true,
+        });
+      }
     },
     // 使用查询返回的数据更新界面
     updateUIWithData(data) {
@@ -1349,19 +1462,30 @@ export default {
     // 上传单张确认图片
     async uploadSingleConfirmImage(base64Data, questionId) {
       return new Promise((resolve, reject) => {
-        const params = {
-          url: [base64Data],
-          id: questionId,
-          FilePicker: base64Data,
-        };
-
-        window.saveImgFils(params, (response) => {
-          if (response.code === 0) {
-            resolve(response.data);
-          } else {
-            reject(new Error(response.msg || "图片上传失败"));
+        try {
+          if (typeof window.saveImgFils !== 'function') {
+            reject(new Error('图片上传功能不可用'));
+            return;
           }
-        });
+          const params = {
+            url: [base64Data],
+            id: questionId,
+            FilePicker: base64Data,
+          };
+
+          window.saveImgFils(params, (response) => {
+            // 清理 base64 引用
+            params.url = null;
+            params.FilePicker = null;
+            if (response.code === 0) {
+              resolve(response.data);
+            } else {
+              reject(new Error(response.msg || "图片上传失败"));
+            }
+          });
+        } catch (e) {
+          reject(e);
+        }
       });
     },
     // 移除单张确认图片
@@ -1395,7 +1519,12 @@ export default {
           !inspection.dispositionDesc ||
           inspection.dispositionDesc.trim() === ""
       );
-      if (emptyInspection.length > 0) {
+      if (emptyInspection.length === 0) return;
+
+      try {
+        if (typeof window.inspectionDel !== 'function') {
+          return;
+        }
         // 循环删除，调用window方法删除远程，过滤本地空检验项
         for (let i = 0; i < emptyInspection.length; i++) {
           const inspection = emptyInspection[i];
@@ -1403,10 +1532,6 @@ export default {
             flag: "DelInspection",
             dispositionId: inspection.dispositionId,
           };
-          console.log(
-            "删除空检验项请求：",
-            JSON.parse(JSON.stringify(delParams))
-          );
           // 调用后台删除接口
           window.inspectionDel(delParams, () => {
             // 删除成功
@@ -1420,6 +1545,8 @@ export default {
         );
         // 同步到原始数据
         this.syncInspectionData();
+      } catch (e) {
+        // 静默失败，不影响主流程
       }
     },
     // 删除空问题
@@ -1427,7 +1554,12 @@ export default {
       const emptyProblem = this.problemList.filter(
         (problem) => !problem.question || problem.question.trim() === ""
       );
-      if (emptyProblem.length > 0) {
+      if (emptyProblem.length === 0) return;
+
+      try {
+        if (typeof window.questionDel !== 'function') {
+          return;
+        }
         // 循环删除，调用window方法删除远程，过滤本地空问题
         for (let i = 0; i < emptyProblem.length; i++) {
           const problem = emptyProblem[i];
@@ -1435,10 +1567,6 @@ export default {
             flag: "DelQuestion",
             questionId: problem.questionId,
           };
-          console.log(
-            "删除空问题请求：",
-            JSON.parse(JSON.stringify(delParams))
-          );
           // 调用后台删除接口
           window.questionDel(delParams, () => {
             // 删除成功
@@ -1450,23 +1578,84 @@ export default {
         );
         // 同步到原始数据
         this.syncProblemData();
+      } catch (e) {
+        // 静默失败，不影响主流程
       }
     },
     // 保存
     async save() {
       this.deleteInspection();
       this.deleteProblem();
+
+      let saveData;
       try {
         // 数据同步
         this.syncProblemData();
         this.syncInspectionData();
-        const saveData = {
+        saveData = {
           ...this.originalData,
           flag: "Confirm",
         };
+      } catch (error) {
+        this.$message({
+          message: "数据同步失败: " + error.message,
+          type: "error",
+          duration: 3000,
+          showClose: true,
+        });
+        return;
+      }
 
+      // 校验确认图片不能为空
+      const missingConfirmImgs = [];
+      for (const problem of this.problemList) {
+        if (
+          problem.isClose === 1 &&
+          (!problem.confirmImageList || problem.confirmImageList.length === 0)
+        ) {
+          missingConfirmImgs.push('问题: ' + (problem.question || '未命名'));
+        }
+      }
+      for (const inspection of this.inspectionList) {
+        if (
+          inspection.isClose === 1 &&
+          (!inspection.confirmImageList ||
+            inspection.confirmImageList.length === 0)
+        ) {
+          missingConfirmImgs.push(
+            '检验项: ' + (inspection.dispositionDesc || '未命名')
+          );
+        }
+      }
+      if (missingConfirmImgs.length > 0) {
+        this.$message({
+          message: '以下项目确认图片不能为空: ' + missingConfirmImgs.join('; '),
+          type: 'warning',
+          duration: 5000,
+          showClose: true,
+        });
+        return;
+      }
+
+      const loading = this.$loading({
+        lock: true,
+        text: '保存中...',
+        background: 'rgba(0, 0, 0, 0.7)',
+      });
+      try {
+        if (typeof window.InspectionOnlineSaveAndSubmit !== 'function') {
+          loading.close();
+          this.$message({
+            message: '保存功能不可用',
+            type: 'error',
+            duration: 3000,
+            showClose: true,
+          });
+          return;
+        }
         // 调用保存接口
         window.InspectionOnlineSaveAndSubmit(saveData, (response) => {
+          loading.close();
           if (response.code === "0") {
             this.$message({
               message: "保存成功",
@@ -1478,15 +1667,18 @@ export default {
             this.$message({
               message: response.msg || "保存失败",
               type: "error",
-              duration: 500,
+              duration: 3000,
               showClose: true,
             });
           }
         });
       } catch (error) {
+        loading.close();
         this.$message({
           message: "保存失败: " + error.message,
           type: "error",
+          duration: 3000,
+          showClose: true,
         });
       }
     },
@@ -1555,17 +1747,45 @@ export default {
     },
     // 提交数据
     submitData() {
+      let submitPayload;
       try {
         // 确保问题数据同步
         this.syncProblemData();
         this.syncInspectionData();
-        const submitData = {
+        submitPayload = {
           ...this.originalData,
           flag: "ConfirmSubmit",
         };
+      } catch (error) {
+        this.$message({
+          message: "数据同步失败: " + error.message,
+          type: "error",
+          duration: 3000,
+          showClose: true,
+        });
+        return;
+      }
+
+      const loading = this.$loading({
+        lock: true,
+        text: '提交中...',
+        background: 'rgba(0, 0, 0, 0.7)',
+      });
+      try {
+        if (typeof window.InspectionOnlineSaveAndSubmit !== 'function') {
+          loading.close();
+          this.$message({
+            message: '提交功能不可用',
+            type: 'error',
+            duration: 3000,
+            showClose: true,
+          });
+          return;
+        }
 
         // 调用保存接口
-        window.InspectionOnlineSaveAndSubmit(submitData, (response) => {
+        window.InspectionOnlineSaveAndSubmit(submitPayload, (response) => {
+          loading.close();
           if (response.code === "0") {
             this.originalData = {};
             this.problemList = [];
@@ -1584,15 +1804,18 @@ export default {
             this.$message({
               message: response.msg || "提交失败",
               type: "error",
-              duration: 500,
+              duration: 3000,
               showClose: true,
             });
           }
         });
       } catch (error) {
+        loading.close();
         this.$message({
           message: "提交失败: " + error.message,
           type: "error",
+          duration: 3000,
+          showClose: true,
         });
       }
     },
@@ -1727,7 +1950,11 @@ export default {
     async processSelectedFiles(files, questionId) {
       const problem = this.problemList.find((p) => p.questionId === questionId);
       if (!problem) return;
-      this.$message.info("正在上传图片，请稍候...");
+      const loading = this.$loading({
+        lock: true,
+        text: '图片上传中 (0/' + files.length + ')...',
+        background: 'rgba(0, 0, 0, 0.7)',
+      });
       try {
         // 处理每个选中的文件
         for (const file of files) {
@@ -1742,18 +1969,30 @@ export default {
           const newImage = {
             name: file.name,
             url: serverUrl,
-            raw: file,
           };
           problem.confirmImageList.push(newImage);
+          loading.setText('图片上传中 (' + problem.confirmImageList.length + '/' + files.length + ')...');
         }
         problem.confirmImgs = problem.confirmImageList
           .map((f) => f.url)
           .join(",");
         // 同步到原始数据
         this.syncProblemData();
-        this.$message.success("图片上传成功");
+        loading.close();
+        this.$message({
+          message: "图片上传成功",
+          type: "success",
+          duration: 500,
+          showClose: true,
+        });
       } catch (error) {
-        this.$message.error("图片上传失败: " + error.message);
+        loading.close();
+        this.$message({
+          message: "图片上传失败: " + error.message,
+          type: "error",
+          duration: 500,
+          showClose: true,
+        });
       }
     },
     // 图片预览缩放相关方法
