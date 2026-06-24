@@ -36,65 +36,60 @@
       <transition name="slide">
         <div class="collapsible-section" v-show="!isCollapsed">
           <div class="collapsible-content">
-            <!-- 左侧：机型编码 -->
-            <div class="left-panel">
-              <div class="model-code-section">
-                <div class="section-title">机型编码</div>
-                <div class="model-code" v-if="modelCode">{{ modelCode }}</div>
-                <div class="no-data" v-else>暂无机型编码</div>
-              </div>
+            <!-- 月顺序号 -->
+            <div class="input-row">
+              <span class="input-label">月顺序号</span>
+              <el-input
+                v-model="monthlySequence"
+                size="small"
+                class="input-field"
+              >
+                <el-button
+                  slot="append"
+                  icon="el-icon-search"
+                  @click="handleMonthlySequenceSearch"
+                >
+                </el-button>
+                <el-button
+                  slot="append"
+                  icon="el-icon-full-screen"
+                  @click="onCamera('monthSequence')"
+                  v-if="isApp"
+                >
+                </el-button>
+              </el-input>
             </div>
-            <!-- 右侧：输入框区域 -->
-            <div class="right-panel">
-              <div class="input-section">
-                <div class="input-row">
-                  <div class="input-label">月顺序号</div>
-                  <el-input
-                    v-model="monthlySequence"
-                    size="small"
-                    class="input-field"
-                  >
-                    <el-button
-                      slot="append"
-                      style="margin-right: 5px"
-                      icon="el-icon-search"
-                      @click="handleMonthlySequenceSearch"
-                    >
-                    </el-button>
-                    <el-button
-                      slot="append"
-                      icon="el-icon-full-screen"
-                      @click="onCamera('monthSequence')"
-                      v-if="isApp"
-                    >
-                    </el-button>
-                  </el-input>
-                </div>
 
-                <div class="input-row">
-                  <div class="input-label">车架号</div>
-                  <el-input
-                    v-model="frameNumber"
-                    size="small"
-                    class="input-field"
-                  >
-                    <el-button
-                      slot="append"
-                      style="margin-right: 5px"
-                      icon="el-icon-search"
-                      @click="handleFrameNumberSearch"
-                    >
-                    </el-button>
-                    <el-button
-                      slot="append"
-                      icon="el-icon-full-screen"
-                      @click="onCamera('vin')"
-                      v-if="isApp"
-                    >
-                    </el-button>
-                  </el-input>
-                </div>
-              </div>
+            <!-- 车架号 -->
+            <div class="input-row">
+              <span class="input-label">车架号</span>
+              <el-input
+                v-model="frameNumber"
+                size="small"
+                class="input-field"
+              >
+                <el-button
+                  slot="append"
+                  icon="el-icon-search"
+                  @click="handleFrameNumberSearch"
+                  style="margin-right: 5px"
+                >
+                </el-button>
+                <el-button
+                  slot="append"
+                  icon="el-icon-full-screen"
+                  @click="onCamera('vin')"
+                  v-if="isApp"
+                >
+                </el-button>
+              </el-input>
+            </div>
+
+            <!-- 机型编码（底部） -->
+            <div class="input-row">
+              <span class="input-label">机型编码</span>
+              <div class="model-code" v-if="modelCode">{{ modelCode }}</div>
+              <div class="no-data" v-else>暂无机型编码</div>
             </div>
           </div>
         </div>
@@ -1034,8 +1029,36 @@ export default {
         transition: this.isTransitioning ? "transform 0.2s ease" : "none",
       };
     },
+
+    // 月顺序号输入框动态宽度
+    monthlySequenceInputStyle() {
+      return this.getInputStyle(this.monthlySequence);
+    },
+
+    // 车架号输入框动态宽度
+    frameNumberInputStyle() {
+      return this.getInputStyle(this.frameNumber);
+    },
   },
   methods: {
+    // 计算输入框动态宽度
+    getInputStyle(value) {
+      const MIN_WIDTH = 200;
+      const MAX_WIDTH = 500;
+      const CHAR_PADDING = 10;
+      const BORDER = 2;
+      const STATIC_OFFSET = 74;
+
+      if (!value) return { width: MIN_WIDTH + "px" };
+
+      let textWidth = 0;
+      for (const ch of value) {
+        textWidth += /[一-鿿　-〿＀-￯]/.test(ch) ? 16 : 8;
+      }
+      const total = textWidth + CHAR_PADDING + BORDER + STATIC_OFFSET + (this.isApp ? 62 : 0);
+      return { width: Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, total)) + "px" };
+    },
+
     handleCloseDialog(type) {
       let saveData = {};
       if (type === "ConfirmInspection") {
@@ -2145,10 +2168,6 @@ export default {
   justify-content: space-between;
 }
 
-.left-panel {
-  flex: 1;
-}
-
 .right-panel {
   flex: 1;
   display: flex;
@@ -2218,63 +2237,56 @@ export default {
 
 .collapsible-content {
   display: flex;
-  margin-bottom: 20px;
-  gap: 15px;
-}
-
-.model-code-section {
-  flex: 1;
-
-  .section-title {
-    font-size: 14px;
-    color: #606266;
-    margin-bottom: 8px;
-  }
-
-  .model-code {
-    font-size: 16px;
-    color: #303133;
-    padding: 8px 12px;
-    background: #f5f7fa;
-    border-radius: 6px;
-    min-height: 40px;
-    display: flex;
-    align-items: center;
-  }
-
-  .no-data {
-    font-size: 14px;
-    color: #c0c4cc;
-    padding: 8px 12px;
-    background: #f5f7fa;
-    border-radius: 6px;
-    text-align: center;
-    min-height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-}
-
-.input-section {
-  flex: 1;
-  display: flex;
   flex-direction: column;
-  gap: 15px;
+  margin-bottom: 20px;
+  gap: 10px;
+}
+
+.model-code {
+  flex: 1;
+  font-size: 14px;
+  color: #303133;
+  padding: 6px 10px;
+  background: #f5f7fa;
+  border-radius: 6px;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  word-break: break-all;
+  overflow-wrap: break-word;
+  line-height: 1.5;
+}
+
+.no-data {
+  flex: 1;
+  font-size: 13px;
+  color: #c0c4cc;
+  padding: 6px 10px;
+  background: #f5f7fa;
+  border-radius: 6px;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .input-row {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 
   .input-label {
+    width: 5em;
     font-size: 14px;
     color: #606266;
-    margin-bottom: 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    text-align: right;
   }
 
   .input-field {
-    width: 100%;
+    flex: 1;
   }
 }
 
